@@ -1,0 +1,42 @@
+# Macro for visualization settings
+
+# Use OpenGL
+/vis/open OGL 800x600-0+0
+
+/vis/viewer/set/autoRefresh false
+/vis/verbose errors
+
+# Draw geometry
+/vis/drawVolume
+
+# Set viewing angle
+/vis/viewer/set/viewpointThetaPhi 45 45 deg
+
+# Zoom
+/vis/viewer/zoom 2.0
+
+# Style
+/vis/viewer/set/style surface
+/vis/viewer/set/auxiliaryEdge true
+/vis/viewer/set/lineSegmentsPerCircle 100
+
+# Add axes
+/vis/scene/add/axes 0 0 0 3 cm
+
+# Trajectories
+/vis/scene/add/trajectories smooth
+/vis/modeling/trajectories/create/drawByParticleID
+/vis/modeling/trajectories/drawByParticleID-0/set gamma yellow
+/vis/modeling/trajectories/drawByParticleID-0/set e- red
+/vis/modeling/trajectories/drawByParticleID-0/set e+ blue
+
+# Accumulate events
+/vis/scene/endOfEventAction accumulate
+
+# Title
+/vis/set/textColour cyan
+/vis/scene/add/text2D 0.9 -.9 18 ! ! Puits Couronne
+
+# Re-enable auto refresh
+/vis/viewer/set/autoRefresh true
+/vis/verbose warnings

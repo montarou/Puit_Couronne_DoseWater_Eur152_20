@@ -1,0 +1,28 @@
+# Macro pour exécution en mode batch
+# Usage: ./puits_couronne run.mac
+
+# Initialisation
+/run/initialize
+
+# Verbosité
+/run/verbose 1
+/event/verbose 0
+/tracking/verbose 0
+
+# Nombre de threads (pour multi-threading)
+# /run/numberOfThreads 4
+
+# ═══════════════════════════════════════════════════════════════
+# SIMULATION COURTE (test)
+# ═══════════════════════════════════════════════════════════════
+# /run/beamOn 1000
+
+# ═══════════════════════════════════════════════════════════════
+# SIMULATION MOYENNE (statistiques correctes)
+# ═══════════════════════════════════════════════════════════════
+/run/beamOn 100000
+
+# ═══════════════════════════════════════════════════════════════
+# SIMULATION LONGUE (haute précision)
+# ═══════════════════════════════════════════════════════════════
+# /run/beamOn 1000000

@@ -1,0 +1,65 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# MACRO DE SIMULATION - PUITS COURONNE
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Géométrie :
+#   - Source Eu-152 à z = 2 cm
+#   - Filtre W/PETG (75%/25%) à z = 4 cm, diamètre 5 cm, épaisseur 5 mm
+#   - Container W/PETG à z = 10 cm avec couronnes d'eau
+#   - Eau : 5 anneaux concentriques de 5 mm de largeur, épaisseur 5 mm
+#
+# ═══════════════════════════════════════════════════════════════════════════
+# RENORMALISATION TEMPORELLE
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Paramètres par défaut :
+#   - Activité source : A = 44 kBq (sur 4π)
+#   - Cône d'émission : θ = 20°
+#   - Fraction angle solide : f = (1 - cos(20°))/2 = 0.0302 = 3.02%
+#
+# Formule du temps d'irradiation :
+#   T_irr = N_events / (f × A)
+#   T_irr = N_events / (0.0302 × 44000)
+#   T_irr = N_events × 0.753 ms
+#
+# Table de conversion :
+#   N = 1,000      → T_irr = 0.75 s
+#   N = 10,000     → T_irr = 7.5 s
+#   N = 100,000    → T_irr = 75 s = 1.25 min
+#   N = 500,000    → T_irr = 377 s = 6.3 min
+#   N = 1,000,000  → T_irr = 753 s = 12.5 min
+#   N = 10,000,000 → T_irr = 7530 s = 2.1 h
+#
+# ═══════════════════════════════════════════════════════════════════════════
+
+# Initialisation
+/run/initialize
+
+# Verbosité
+/run/verbose 1
+/event/verbose 0
+/tracking/verbose 0
+
+# Nombre de threads (pour multi-threading, décommenter si supporté)
+# /run/numberOfThreads 4
+
+# ═══════════════════════════════════════════════════════════════════════════
+# CHOIX DU NOMBRE D'ÉVÉNEMENTS
+# ═══════════════════════════════════════════════════════════════════════════
+# Chaque événement = 1 désintégration = ~1.92 gammas en moyenne
+# Décommenter la ligne souhaitée :
+
+# Test rapide (0.75 s d'irradiation)
+# /run/beamOn 1000
+
+# Validation (7.5 s d'irradiation)
+# /run/beamOn 10000
+
+# Production standard (75 s = 1.25 min d'irradiation)
+#/run/beamOn 100000
+
+# Haute statistique (12.5 min d'irradiation)
+ /run/beamOn 1000000
+
+# Très haute statistique (2.1 h d'irradiation)
+# /run/beamOn 10000000

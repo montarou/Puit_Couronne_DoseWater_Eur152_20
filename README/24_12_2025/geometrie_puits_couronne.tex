@@ -1,0 +1,574 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{tikz}
+\usepackage{amsmath}
+\usepackage{geometry}
+\usepackage{xcolor}
+
+\geometry{margin=2cm}
+
+\usetikzlibrary{patterns, decorations.pathmorphing, arrows.meta, calc, positioning, shapes.geometric}
+
+% Définition des couleurs
+\definecolor{tungsten}{RGB}{100,100,120}
+\definecolor{wpetg}{RGB}{80,80,100}
+\definecolor{water}{RGB}{100,180,255}
+\definecolor{waterlight}{RGB}{150,200,255}
+\definecolor{source}{RGB}{255,200,0}
+\definecolor{cone1}{RGB}{255,100,100}
+\definecolor{cone2}{RGB}{100,100,255}
+
+\title{Géométrie du détecteur ``Puits Couronne''\\
+\large Simulation Geant4 -- Source Eu-152}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Coupe longitudinale (plan xz)}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[scale=0.9, >=Stealth]
+
+    % Échelle : 1 cm dessin = 1 cm réel
+    \def\sourceZ{2}
+    \def\filterZ{4}
+    \def\filterR{2.5}
+    \def\filterThick{0.5}
+    \def\containerZ{10}
+    \def\containerR{2.5}
+    \def\containerWall{0.2}
+    \def\containerHeight{0.7}
+    \def\waterThick{0.5}
+    
+    % Axe z
+    \draw[->, thick] (-0.5,0) -- (14,0) node[right] {$z$ (cm)};
+    \draw[->, thick] (0,-4) -- (0,4) node[above] {$x$ (cm)};
+    
+    % Grille de fond (optionnelle)
+    \draw[very thin, gray!30] (0,-3.5) grid[step=1] (13,3.5);
+    
+    % =========================================================================
+    % SOURCE Eu-152 à z = 2 cm
+    % =========================================================================
+    \fill[source] (\sourceZ, 0) circle (0.15);
+    \node[below=0.3cm] at (\sourceZ, 0) {\footnotesize Source};
+    \node[above=0.2cm] at (\sourceZ, 0) {\footnotesize Eu-152};
+    
+    % Ligne de position source
+    \draw[dashed, gray] (\sourceZ, -3.5) -- (\sourceZ, 3.5);
+    \node[below] at (\sourceZ, -3.7) {\footnotesize $z=2$};
+    
+    % =========================================================================
+    % FILTRE W/PETG à z = 4 cm (épaisseur 5 mm)
+    % =========================================================================
+    \fill[wpetg] (\filterZ - \filterThick/2, -\filterR) 
+                 rectangle (\filterZ + \filterThick/2, \filterR);
+    \draw[thick] (\filterZ - \filterThick/2, -\filterR) 
+                 rectangle (\filterZ + \filterThick/2, \filterR);
+    
+    % Hachures pour le filtre
+    \fill[pattern=north east lines, pattern color=tungsten!50] 
+         (\filterZ - \filterThick/2, -\filterR) 
+         rectangle (\filterZ + \filterThick/2, \filterR);
+    
+    \node[above=0.1cm] at (\filterZ, \filterR) {\footnotesize Filtre W/PETG};
+    \node[below=0.1cm] at (\filterZ, -\filterR) {\footnotesize $\varnothing$ 5 cm};
+    
+    % Ligne de position filtre
+    \draw[dashed, gray] (\filterZ, -3.5) -- (\filterZ, 3.5);
+    \node[below] at (\filterZ, -3.7) {\footnotesize $z=4$};
+    
+    % Cotation épaisseur filtre
+    \draw[<->, thick] (\filterZ - \filterThick/2, -3.2) -- (\filterZ + \filterThick/2, -3.2);
+    \node[below] at (\filterZ, -3.2) {\tiny 5 mm};
+    
+    % =========================================================================
+    % CONTAINER W/PETG à z = 10 cm
+    % =========================================================================
+    \def\contInnerTop{{\containerZ + \containerHeight/2}}
+    \def\contInnerBot{{\containerZ - \containerHeight/2}}
+    \def\contOuterR{{\containerR + \containerWall}}
+    
+    % Paroi latérale supérieure (x > 0)
+    \fill[wpetg] ({\containerZ - \containerHeight/2}, \containerR) 
+                 rectangle ({\containerZ + \containerHeight/2}, {\containerR + \containerWall});
+    \draw[thick] ({\containerZ - \containerHeight/2}, \containerR) 
+                 rectangle ({\containerZ + \containerHeight/2}, {\containerR + \containerWall});
+    \fill[pattern=north east lines, pattern color=tungsten!50]
+         ({\containerZ - \containerHeight/2}, \containerR) 
+         rectangle ({\containerZ + \containerHeight/2}, {\containerR + \containerWall});
+    
+    % Paroi latérale inférieure (x < 0)
+    \fill[wpetg] ({\containerZ - \containerHeight/2}, -\containerR) 
+                 rectangle ({\containerZ + \containerHeight/2}, {-\containerR - \containerWall});
+    \draw[thick] ({\containerZ - \containerHeight/2}, -\containerR) 
+                 rectangle ({\containerZ + \containerHeight/2}, {-\containerR - \containerWall});
+    \fill[pattern=north east lines, pattern color=tungsten!50]
+         ({\containerZ - \containerHeight/2}, -\containerR) 
+         rectangle ({\containerZ + \containerHeight/2}, {-\containerR - \containerWall});
+    
+    % Fond du container (à droite, z+)
+    \fill[wpetg] ({\containerZ + \containerHeight/2}, {-\containerR - \containerWall}) 
+                 rectangle ({\containerZ + \containerHeight/2 + \containerWall}, {\containerR + \containerWall});
+    \draw[thick] ({\containerZ + \containerHeight/2}, {-\containerR - \containerWall}) 
+                 rectangle ({\containerZ + \containerHeight/2 + \containerWall}, {\containerR + \containerWall});
+    \fill[pattern=north east lines, pattern color=tungsten!50]
+         ({\containerZ + \containerHeight/2}, {-\containerR - \containerWall}) 
+         rectangle ({\containerZ + \containerHeight/2 + \containerWall}, {\containerR + \containerWall});
+    
+    % Label container
+    \node[above=0.1cm] at (\containerZ, {\containerR + \containerWall}) {\footnotesize Container W/PETG};
+    
+    % =========================================================================
+    % COURONNES D'EAU (5 anneaux de 5 mm de largeur)
+    % =========================================================================
+    \def\waterZ{{\containerZ + \containerHeight/2 - \waterThick/2}}
+    
+    % Anneau 4 (extérieur) : r = 20-25 mm
+    \fill[water!60] ({\containerZ - \containerHeight/2 + 0.2}, 2.0) 
+                    rectangle ({\containerZ + \containerHeight/2 - \waterThick}, 2.5);
+    \fill[water!60] ({\containerZ - \containerHeight/2 + 0.2}, -2.0) 
+                    rectangle ({\containerZ + \containerHeight/2 - \waterThick}, -2.5);
+    
+    % Anneau 3 : r = 15-20 mm
+    \fill[water!70] ({\containerZ - \containerHeight/2 + 0.2}, 1.5) 
+                    rectangle ({\containerZ + \containerHeight/2 - \waterThick}, 2.0);
+    \fill[water!70] ({\containerZ - \containerHeight/2 + 0.2}, -1.5) 
+                    rectangle ({\containerZ + \containerHeight/2 - \waterThick}, -2.0);
+    
+    % Anneau 2 : r = 10-15 mm
+    \fill[water!80] ({\containerZ - \containerHeight/2 + 0.2}, 1.0) 
+                    rectangle ({\containerZ + \containerHeight/2 - \waterThick}, 1.5);
+    \fill[water!80] ({\containerZ - \containerHeight/2 + 0.2}, -1.0) 
+                    rectangle ({\containerZ + \containerHeight/2 - \waterThick}, -1.5);
+    
+    % Anneau 1 : r = 5-10 mm
+    \fill[water!90] ({\containerZ - \containerHeight/2 + 0.2}, 0.5) 
+                    rectangle ({\containerZ + \containerHeight/2 - \waterThick}, 1.0);
+    \fill[water!90] ({\containerZ - \containerHeight/2 + 0.2}, -0.5) 
+                    rectangle ({\containerZ + \containerHeight/2 - \waterThick}, -1.0);
+    
+    % Anneau 0 (centre) : r = 0-5 mm
+    \fill[water] ({\containerZ - \containerHeight/2 + 0.2}, -0.5) 
+                 rectangle ({\containerZ + \containerHeight/2 - \waterThick}, 0.5);
+    
+    % Contour eau
+    \draw[thick, blue!50] ({\containerZ - \containerHeight/2 + 0.2}, -2.5) 
+                          rectangle ({\containerZ + \containerHeight/2 - \waterThick}, 2.5);
+    
+    % Label eau
+    \node[right, blue!70!black] at ({\containerZ + \containerHeight/2 + 0.3}, 1.5) {\footnotesize Eau};
+    \node[right, blue!70!black] at ({\containerZ + \containerHeight/2 + 0.3}, 1.0) {\footnotesize (5 anneaux)};
+    
+    % Ligne de position container
+    \draw[dashed, gray] (\containerZ, -3.5) -- (\containerZ, 3.5);
+    \node[below] at (\containerZ, -3.7) {\footnotesize $z=10$};
+    
+    % =========================================================================
+    % COTATIONS
+    % =========================================================================
+    
+    % Distance source-filtre
+    \draw[<->, thick, red!70!black] (\sourceZ, 3.3) -- (\filterZ - \filterThick/2, 3.3);
+    \node[above, red!70!black] at ({(\sourceZ + \filterZ - \filterThick/2)/2}, 3.3) {\footnotesize 1.75 cm};
+    
+    % Distance source-container
+    \draw[<->, thick, blue!70!black] (\sourceZ, -2.8) -- ({\containerZ - \containerHeight/2}, -2.8);
+    \node[below, blue!70!black] at ({(\sourceZ + \containerZ - \containerHeight/2)/2}, -2.8) {\footnotesize 7.65 cm};
+    
+    % Rayon filtre
+    \draw[<->, thick] (\filterZ + 0.5, 0) -- (\filterZ + 0.5, \filterR);
+    \node[right] at (\filterZ + 0.5, \filterR/2) {\tiny R=2.5};
+    
+    % =========================================================================
+    % LÉGENDE
+    % =========================================================================
+    \node[draw, fill=white, anchor=north west] at (11, 3.5) {
+        \begin{tabular}{cl}
+            \tikz\fill[source] (0,0) circle (0.1); & Source Eu-152 \\
+            \tikz\fill[wpetg, pattern=north east lines, pattern color=tungsten!50] (0,0) rectangle (0.3,0.2); & W/PETG (75\%/25\%) \\
+            \tikz\fill[water] (0,0) rectangle (0.3,0.2); & Eau \\
+        \end{tabular}
+    };
+
+\end{tikzpicture}
+\caption{Coupe longitudinale (plan $xz$) du détecteur ``Puits Couronne''. La source Eu-152 est située à $z=2$ cm, le filtre W/PETG à $z=4$ cm, et le container avec les couronnes d'eau à $z=10$ cm.}
+\label{fig:coupe_xz}
+\end{figure}
+
+\newpage
+\section{Visualisation des angles solides}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[scale=0.85, >=Stealth]
+
+    % Échelle adaptée pour visualiser les cônes
+    \def\sourceZ{0}
+    \def\filterZ{1.75}
+    \def\filterR{2.5}
+    \def\containerZ{7.65}
+    \def\containerR{2.5}
+    
+    % Axe z
+    \draw[->, thick] (-0.5,0) -- (10,0) node[right] {$z$ (cm)};
+    \draw[->, thick] (0,-5) -- (0,5) node[above] {$x$ (cm)};
+    
+    % =========================================================================
+    % SOURCE
+    % =========================================================================
+    \fill[source] (\sourceZ, 0) circle (0.2);
+    \node[left] at (-0.3, 0) {\footnotesize Source};
+    
+    % =========================================================================
+    % CÔNE D'ÉMISSION (60°)
+    % =========================================================================
+    \def\coneAngle{60}
+    \def\coneLength{9}
+    
+    % Remplissage du cône d'émission
+    \fill[yellow!20, opacity=0.5] (\sourceZ, 0) 
+        -- ({\coneLength}, {\coneLength * tan(\coneAngle)})
+        -- ({\coneLength}, {-\coneLength * tan(\coneAngle)})
+        -- cycle;
+    
+    % Bords du cône d'émission
+    \draw[thick, orange, dashed] (\sourceZ, 0) -- ({\coneLength}, {\coneLength * tan(\coneAngle)});
+    \draw[thick, orange, dashed] (\sourceZ, 0) -- ({\coneLength}, {-\coneLength * tan(\coneAngle)});
+    
+    % Arc pour l'angle 60°
+    \draw[thick, orange] (0.8, 0) arc (0:60:0.8);
+    \draw[thick, orange] (0.8, 0) arc (0:-60:0.8);
+    \node[orange, right] at (1.0, 0.6) {\footnotesize $60°$};
+    
+    % =========================================================================
+    % CÔNE VERS LE FILTRE (θ = 55°)
+    % =========================================================================
+    \def\filterAngle{55}
+    
+    % Remplissage du cône vers filtre
+    \fill[cone1, opacity=0.3] (\sourceZ, 0) 
+        -- (\filterZ, \filterR)
+        -- (\filterZ, -\filterR)
+        -- cycle;
+    
+    % Bords du cône vers filtre
+    \draw[thick, cone1] (\sourceZ, 0) -- (\filterZ, \filterR);
+    \draw[thick, cone1] (\sourceZ, 0) -- (\filterZ, -\filterR);
+    
+    % Filtre
+    \fill[wpetg] (\filterZ, -\filterR) rectangle ({\filterZ + 0.3}, \filterR);
+    \draw[thick] (\filterZ, -\filterR) rectangle ({\filterZ + 0.3}, \filterR);
+    \fill[pattern=north east lines, pattern color=tungsten!50] 
+         (\filterZ, -\filterR) rectangle ({\filterZ + 0.3}, \filterR);
+    
+    % Arc pour l'angle vers filtre
+    \draw[thick, cone1] (1.2, 0) arc (0:\filterAngle:1.2);
+    \node[cone1, above right] at (1.4, 0.9) {\footnotesize $\theta_1 = 55°$};
+    
+    % =========================================================================
+    % CÔNE VERS LE CONTAINER (θ = 18.1°)
+    % =========================================================================
+    \def\containerAngle{18.1}
+    
+    % Remplissage du cône vers container
+    \fill[cone2, opacity=0.3] (\sourceZ, 0) 
+        -- (\containerZ, \containerR)
+        -- (\containerZ, -\containerR)
+        -- cycle;
+    
+    % Bords du cône vers container
+    \draw[thick, cone2] (\sourceZ, 0) -- (\containerZ, \containerR);
+    \draw[thick, cone2] (\sourceZ, 0) -- (\containerZ, -\containerR);
+    
+    % Container (simplifié)
+    \fill[wpetg] (\containerZ, \containerR) rectangle ({\containerZ + 0.5}, {\containerR + 0.2});
+    \fill[wpetg] (\containerZ, -\containerR) rectangle ({\containerZ + 0.5}, {-\containerR - 0.2});
+    \fill[wpetg] ({\containerZ + 0.5}, {-\containerR - 0.2}) rectangle ({\containerZ + 0.7}, {\containerR + 0.2});
+    \draw[thick] (\containerZ, \containerR) rectangle ({\containerZ + 0.5}, {\containerR + 0.2});
+    \draw[thick] (\containerZ, -\containerR) rectangle ({\containerZ + 0.5}, {-\containerR - 0.2});
+    
+    % Eau
+    \fill[water] (\containerZ, -\containerR) rectangle ({\containerZ + 0.4}, \containerR);
+    
+    % Arc pour l'angle vers container
+    \draw[thick, cone2] (2.5, 0) arc (0:\containerAngle:2.5);
+    \node[cone2, above] at (3.0, 0.6) {\footnotesize $\theta_2 = 18°$};
+    
+    % =========================================================================
+    % ANNOTATIONS DISTANCES
+    % =========================================================================
+    
+    % Distance source-filtre
+    \draw[<->, thick] (\sourceZ, -4) -- (\filterZ, -4);
+    \node[below] at ({(\sourceZ + \filterZ)/2}, -4) {\footnotesize $d_1 = 1.75$ cm};
+    
+    % Distance source-container
+    \draw[<->, thick] (\sourceZ, -4.8) -- (\containerZ, -4.8);
+    \node[below] at ({(\sourceZ + \containerZ)/2}, -4.8) {\footnotesize $d_2 = 7.65$ cm};
+    
+    % Rayon
+    \draw[<->, thick] ({\containerZ + 1}, 0) -- ({\containerZ + 1}, \containerR);
+    \node[right] at ({\containerZ + 1}, \containerR/2) {\footnotesize $R = 2.5$ cm};
+    
+    % =========================================================================
+    % TABLEAU RÉCAPITULATIF
+    % =========================================================================
+    \node[draw, fill=white, anchor=north west, align=left] at (0, -5.5) {
+        \begin{tabular}{|l|c|c|c|}
+        \hline
+        \textbf{Élément} & $\theta$ & $\Omega$ (sr) & \% de $4\pi$ \\
+        \hline
+        Cône émission & $60°$ & $\pi$ & 25\% \\
+        Filtre W/PETG & $55°$ & 2.68 & 21.3\% \\
+        Container/Eau & $18°$ & 0.31 & 2.5\% \\
+        \hline
+        \end{tabular}
+    };
+
+\end{tikzpicture}
+\caption{Visualisation des cônes d'angle solide depuis la source vers les différents éléments. Le cône d'émission (60°) est représenté en orange, le cône vers le filtre ($\theta_1 = 55°$) en rouge, et le cône vers les couronnes d'eau ($\theta_2 = 18°$) en bleu.}
+\label{fig:angles_solides}
+\end{figure}
+
+\newpage
+\section{Vue détaillée des couronnes d'eau}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.2, >=Stealth]
+
+    % Vue de face (plan xy) des couronnes d'eau
+    
+    % Anneau 4 (extérieur) : r = 20-25 mm
+    \fill[water!50] (0,0) circle (2.5);
+    
+    % Anneau 3 : r = 15-20 mm
+    \fill[water!60] (0,0) circle (2.0);
+    
+    % Anneau 2 : r = 10-15 mm
+    \fill[water!70] (0,0) circle (1.5);
+    
+    % Anneau 1 : r = 5-10 mm
+    \fill[water!85] (0,0) circle (1.0);
+    
+    % Anneau 0 (centre) : r = 0-5 mm
+    \fill[water] (0,0) circle (0.5);
+    
+    % Cercles de séparation
+    \draw[thick, blue!70] (0,0) circle (0.5);
+    \draw[thick, blue!70] (0,0) circle (1.0);
+    \draw[thick, blue!70] (0,0) circle (1.5);
+    \draw[thick, blue!70] (0,0) circle (2.0);
+    \draw[thick, blue!70] (0,0) circle (2.5);
+    
+    % Container (paroi externe)
+    \draw[ultra thick, wpetg] (0,0) circle (2.7);
+    
+    % Axes
+    \draw[->, thick] (-3.2,0) -- (3.5,0) node[right] {$x$};
+    \draw[->, thick] (0,-3.2) -- (0,3.5) node[above] {$y$};
+    
+    % Labels des anneaux
+    \node[white, font=\footnotesize\bfseries] at (0,0) {0};
+    \node[blue!90!black, font=\footnotesize\bfseries] at (0.75,0) {1};
+    \node[blue!80!black, font=\footnotesize\bfseries] at (1.25,0) {2};
+    \node[blue!70!black, font=\footnotesize\bfseries] at (1.75,0) {3};
+    \node[blue!60!black, font=\footnotesize\bfseries] at (2.25,0) {4};
+    
+    % Cotations des rayons
+    \draw[<->, thick, red] (0, -2.8) -- (0.5, -2.8);
+    \node[below, red, font=\tiny] at (0.25, -2.8) {5};
+    
+    \draw[<->, thick, red] (0.5, -2.8) -- (1.0, -2.8);
+    \node[below, red, font=\tiny] at (0.75, -2.8) {5};
+    
+    \draw[<->, thick, red] (1.0, -2.8) -- (1.5, -2.8);
+    \node[below, red, font=\tiny] at (1.25, -2.8) {5};
+    
+    \draw[<->, thick, red] (1.5, -2.8) -- (2.0, -2.8);
+    \node[below, red, font=\tiny] at (1.75, -2.8) {5};
+    
+    \draw[<->, thick, red] (2.0, -2.8) -- (2.5, -2.8);
+    \node[below, red, font=\tiny] at (2.25, -2.8) {5};
+    
+    \node[below, font=\footnotesize] at (1.25, -3.1) {(mm)};
+    
+    % Tableau des caractéristiques
+    \node[draw, fill=white, anchor=north west, align=left] at (3.2, 2.5) {
+        \footnotesize
+        \begin{tabular}{|c|c|c|c|}
+        \hline
+        \textbf{Ring} & $r_{\text{in}}$ & $r_{\text{out}}$ & \textbf{Aire} \\
+        & (mm) & (mm) & (mm²) \\
+        \hline
+        0 & 0 & 5 & 78.5 \\
+        1 & 5 & 10 & 235.6 \\
+        2 & 10 & 15 & 392.7 \\
+        3 & 15 & 20 & 549.8 \\
+        4 & 20 & 25 & 706.9 \\
+        \hline
+        \multicolumn{3}{|c|}{\textbf{Total}} & 1963.5 \\
+        \hline
+        \end{tabular}
+    };
+
+\end{tikzpicture}
+\caption{Vue de face (plan $xy$) des 5 couronnes d'eau concentriques. Chaque anneau a une largeur radiale de 5 mm. L'épaisseur de l'eau est de 5 mm (direction $z$).}
+\label{fig:couronnes_eau}
+\end{figure}
+
+\newpage
+\section{Schéma récapitulatif avec dimensions}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[scale=0.75, >=Stealth]
+
+    % Fond
+    \fill[gray!5] (-1,-6) rectangle (16,6);
+    
+    % Axe z principal
+    \draw[->, ultra thick] (-0.5,0) -- (15.5,0) node[right] {\textbf{z (cm)}};
+    
+    % Graduation
+    \foreach \x in {0,2,4,6,8,10,12,14} {
+        \draw[thick] (\x, -0.15) -- (\x, 0.15);
+        \node[below] at (\x, -0.2) {\footnotesize \x};
+    }
+    
+    % =========================================================================
+    % SOURCE à z = 2 cm
+    % =========================================================================
+    \fill[source] (2, 0) circle (0.25);
+    \draw[thick] (2, 0) circle (0.25);
+    
+    % Émission dans le cône
+    \foreach \angle in {-50,-40,-30,-20,-10,0,10,20,30,40,50} {
+        \draw[->, orange!70, thick] (2,0) -- ({2 + 1.5*cos(\angle)}, {1.5*sin(\angle)});
+    }
+    
+    \node[above=0.5cm, align=center] at (2, 0.5) {\textbf{Source Eu-152}\\[-2pt]\footnotesize 44 kBq\\[-2pt]\footnotesize cône 60°};
+    
+    \draw[dashed, gray] (2, -5.5) -- (2, 5.5);
+    
+    % =========================================================================
+    % FILTRE à z = 4 cm
+    % =========================================================================
+    \fill[wpetg] (3.75, -2.5) rectangle (4.25, 2.5);
+    \fill[pattern=north east lines, pattern color=tungsten!70] 
+         (3.75, -2.5) rectangle (4.25, 2.5);
+    \draw[thick] (3.75, -2.5) rectangle (4.25, 2.5);
+    
+    \node[above=0.3cm, align=center] at (4, 2.5) {\textbf{Filtre W/PETG}\\[-2pt]\footnotesize $\varnothing$ 50 mm\\[-2pt]\footnotesize ép. 5 mm};
+    
+    \draw[dashed, gray] (4, -5.5) -- (4, 5.5);
+    
+    % Cotation
+    \draw[<->, thick, red] (3.75, -3.5) -- (4.25, -3.5);
+    \node[below, red] at (4, -3.5) {\footnotesize 5 mm};
+    
+    \draw[<->, thick, red] (4.5, 0) -- (4.5, 2.5);
+    \node[right, red] at (4.5, 1.25) {\footnotesize R=25 mm};
+    
+    % Distance source-filtre
+    \draw[<->, ultra thick, blue] (2, -4.5) -- (3.75, -4.5);
+    \node[below, blue] at (2.875, -4.5) {\footnotesize 17.5 mm};
+    
+    % =========================================================================
+    % CONTAINER à z = 10 cm
+    % =========================================================================
+    
+    % Parois latérales
+    \fill[wpetg] (9.65, 2.5) rectangle (10.35, 2.7);
+    \fill[wpetg] (9.65, -2.5) rectangle (10.35, -2.7);
+    \fill[pattern=north east lines, pattern color=tungsten!70] 
+         (9.65, 2.5) rectangle (10.35, 2.7);
+    \fill[pattern=north east lines, pattern color=tungsten!70] 
+         (9.65, -2.5) rectangle (10.35, -2.7);
+    \draw[thick] (9.65, 2.5) rectangle (10.35, 2.7);
+    \draw[thick] (9.65, -2.5) rectangle (10.35, -2.7);
+    
+    % Fond
+    \fill[wpetg] (10.35, -2.7) rectangle (10.55, 2.7);
+    \fill[pattern=north east lines, pattern color=tungsten!70] 
+         (10.35, -2.7) rectangle (10.55, 2.7);
+    \draw[thick] (10.35, -2.7) rectangle (10.55, 2.7);
+    
+    % Eau (5 anneaux simplifiés)
+    \fill[water!60] (9.65, -2.5) rectangle (9.85, 2.5);
+    \fill[water!70] (9.65, -2.0) rectangle (9.85, 2.0);
+    \fill[water!80] (9.65, -1.5) rectangle (9.85, 1.5);
+    \fill[water!90] (9.65, -1.0) rectangle (9.85, 1.0);
+    \fill[water] (9.65, -0.5) rectangle (9.85, 0.5);
+    \draw[thick, blue!50] (9.65, -2.5) rectangle (9.85, 2.5);
+    
+    \node[above=0.3cm, align=center] at (10, 2.7) {\textbf{Container W/PETG}\\[-2pt]\footnotesize + eau (5 anneaux)};
+    
+    \draw[dashed, gray] (10, -5.5) -- (10, 5.5);
+    
+    % Cotations container
+    \draw[<->, thick, red] (9.65, -3.5) -- (10.55, -3.5);
+    \node[below, red] at (10.1, -3.5) {\footnotesize 9 mm};
+    
+    \draw[<->, thick, red] (10.8, 0) -- (10.8, 2.5);
+    \node[right, red] at (10.8, 1.25) {\footnotesize R=25 mm};
+    
+    % Distance source-container
+    \draw[<->, ultra thick, blue] (2, -5.2) -- (9.65, -5.2);
+    \node[below, blue] at (5.825, -5.2) {\footnotesize 76.5 mm};
+    
+    % =========================================================================
+    % ANGLES SOLIDES (cônes)
+    % =========================================================================
+    
+    % Cône vers filtre
+    \draw[thick, red!70, dashed] (2,0) -- (3.75, 2.5);
+    \draw[thick, red!70, dashed] (2,0) -- (3.75, -2.5);
+    
+    % Cône vers container
+    \draw[thick, blue!70, dashed] (2,0) -- (9.65, 2.5);
+    \draw[thick, blue!70, dashed] (2,0) -- (9.65, -2.5);
+    
+    % =========================================================================
+    % BOÎTE RÉSUMÉ ANGLES SOLIDES
+    % =========================================================================
+    \node[draw, fill=white, rounded corners, anchor=north west] at (11.5, 5.5) {
+        \begin{tabular}{ll}
+        \multicolumn{2}{c}{\textbf{Angles solides}} \\
+        \hline
+        Filtre: & $\Omega_1 = 2.68$ sr \\
+        & $\theta_1 = 55°$ \\
+        & (85\% du cône) \\
+        \hline
+        Container: & $\Omega_2 = 0.31$ sr \\
+        & $\theta_2 = 18°$ \\
+        & (10\% du cône) \\
+        \end{tabular}
+    };
+    
+    % =========================================================================
+    % FORMULES
+    % =========================================================================
+    \node[draw, fill=yellow!10, rounded corners, anchor=south west] at (11.5, -5.5) {
+        \begin{minipage}{4cm}
+        \footnotesize
+        \textbf{Formules:}
+        \begin{align*}
+        \theta &= \arctan\left(\frac{R}{d}\right) \\
+        \Omega &= 2\pi(1-\cos\theta)
+        \end{align*}
+        \end{minipage}
+    };
+
+\end{tikzpicture}
+\caption{Schéma récapitulatif de la géométrie avec toutes les dimensions et les cônes d'angle solide depuis la source vers les différents éléments.}
+\label{fig:recapitulatif}
+\end{figure}
+
+\end{document}
