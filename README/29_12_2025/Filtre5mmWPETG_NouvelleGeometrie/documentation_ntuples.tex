@@ -1,0 +1,274 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{tcolorbox}
+\usepackage{caption}
+
+\geometry{margin=2.5cm}
+
+\begin{document}
+
+\section*{Ntuples des plans de comptage du container}
+
+\begin{tcolorbox}[colback=blue!5,colframe=blue,title=\textbf{Addition de ntuples}]
+\noindent Deux ntuples ont été ajoutés pour enregistrer les passages de particules aux plans de comptage situés juste avant et juste après l'eau (GAP = 0). Les données sont enregistrées \textbf{par désintégration} (un événement = une désintégration).
+\end{tcolorbox}
+
+%===============================================================================
+% NTUPLE PRECONTAINER
+%===============================================================================
+
+\subsection*{Ntuple \texttt{precontainer} (index 2)}
+
+\noindent Ce ntuple enregistre les \textbf{photons} et les \textbf{électrons} traversant le plan PreContainerPlane en direction de l'eau.
+
+\begin{tcolorbox}[colback=orange!10,colframe=orange!80!black,title=\textbf{Caractéristiques du plan PreContainerPlane}]
+\begin{itemize}
+    \item \textbf{Position} : z = 97.5 -- 98.5 mm (centre à 98.0 mm)
+    \item \textbf{Limite haute} : 98.5 mm = surface basse de l'eau
+    \item \textbf{Matériau} : Air
+    \item \textbf{GAP} : 0 (collé à l'eau)
+    \item \textbf{Rayon} : 25 mm
+    \item \textbf{Volume logique} : \texttt{PreContainerPlaneLog}
+\end{itemize}
+\end{tcolorbox}
+
+\begin{table}[H]
+\centering
+\caption{Variables du ntuple \texttt{precontainer}}
+\begin{tabular}{llp{8cm}}
+\toprule
+\textbf{Variable} & \textbf{Type} & \textbf{Description} \\
+\midrule
+\texttt{nPhotons} & Int & Nombre de photons traversant le plan en direction +z (vers l'eau) \\
+\texttt{sumEPhotons\_keV} & Double & Somme des énergies cinétiques de ces photons (keV) \\
+\midrule
+\texttt{nElectrons} & Int & Nombre d'électrons traversant le plan en direction +z (vers l'eau) \\
+\texttt{sumEElectrons\_keV} & Double & Somme des énergies cinétiques de ces électrons (keV) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection*{Conditions de remplissage}
+
+\noindent Pour chaque particule traversant le plan PreContainerPlane, les conditions suivantes sont vérifiées :
+
+\paragraph{Photons vers l'eau}
+\begin{itemize}
+\item \textbf{Type de particule} : gamma ($\gamma$)
+\item \textbf{Direction} : $p_z > 0$ (vers l'eau, direction +z)
+\item \textbf{Condition de passage} : 
+\begin{itemize}
+\item Volume de départ $\neq$ \texttt{PreContainerPlaneLog}
+\item Volume d'arrivée $=$ \texttt{PreContainerPlaneLog}
+\end{itemize}
+\end{itemize}
+
+\begin{verbatim}
+if (postLogVolName == "PreContainerPlaneLog" 
+    && logicalVolumeName != "PreContainerPlaneLog") {
+    if (particleName == "gamma" && pz > 0) {
+        fEventAction->RecordPreContainerPhoton(kineticEnergy);
+    }
+}
+\end{verbatim}
+
+\paragraph{Électrons vers l'eau}
+\begin{itemize}
+\item \textbf{Type de particule} : électron ($e^-$)
+\item \textbf{Direction} : $p_z > 0$ (vers l'eau, direction +z)
+\item \textbf{Condition de passage} : 
+\begin{itemize}
+\item Volume de départ $\neq$ \texttt{PreContainerPlaneLog}
+\item Volume d'arrivée $=$ \texttt{PreContainerPlaneLog}
+\end{itemize}
+\end{itemize}
+
+\begin{verbatim}
+if (postLogVolName == "PreContainerPlaneLog" 
+    && logicalVolumeName != "PreContainerPlaneLog") {
+    if (particleName == "e-" && pz > 0) {
+        fEventAction->RecordPreContainerElectron(kineticEnergy);
+    }
+}
+\end{verbatim}
+
+\newpage
+%===============================================================================
+% NTUPLE POSTCONTAINER
+%===============================================================================
+
+\subsection*{Ntuple \texttt{postcontainer} (index 3)}
+
+\noindent Ce ntuple enregistre les particules traversant le plan PostContainerPlane, avec distinction selon leur type et direction.
+
+\begin{tcolorbox}[colback=violet!10,colframe=violet!80!black,title=\textbf{Caractéristiques du plan PostContainerPlane}]
+\begin{itemize}
+    \item \textbf{Position} : z = 103.5 -- 104.5 mm (centre à 104.0 mm)
+    \item \textbf{Limite basse} : 103.5 mm = surface haute de l'eau
+    \item \textbf{Matériau} : W/PETG (75\%/25\%)
+    \item \textbf{GAP} : 0 (collé à l'eau)
+    \item \textbf{Rayon} : 25 mm
+    \item \textbf{Volume logique} : \texttt{PostContainerPlaneLog}
+\end{itemize}
+\end{tcolorbox}
+
+\begin{table}[H]
+\centering
+\caption{Variables du ntuple \texttt{postcontainer}}
+\begin{tabular}{llp{7cm}}
+\toprule
+\textbf{Variable} & \textbf{Type} & \textbf{Description} \\
+\midrule
+\texttt{nPhotons\_back} & Int & Nombre de photons venant de l'eau (direction -z) \\
+\texttt{sumEPhotons\_back\_keV} & Double & Somme des énergies cinétiques de ces photons (keV) \\
+\midrule
+\texttt{nElectrons\_back} & Int & Nombre d'électrons venant de l'eau (direction -z) \\
+\texttt{sumEElectrons\_back\_keV} & Double & Somme des énergies cinétiques de ces électrons (keV) \\
+\midrule
+\texttt{nElectrons\_fwd} & Int & Nombre d'électrons allant vers l'eau (direction +z) \\
+\texttt{sumEElectrons\_fwd\_keV} & Double & Somme des énergies cinétiques de ces électrons (keV) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection*{Conditions de remplissage}
+
+\noindent Pour chaque particule traversant le plan PostContainerPlane :
+
+\paragraph{Photons rétrodiffusés (depuis l'eau)}
+\begin{itemize}
+\item \textbf{Type de particule} : gamma ($\gamma$)
+\item \textbf{Direction} : $p_z < 0$ (depuis l'eau, direction -z)
+\end{itemize}
+
+\begin{verbatim}
+if (postLogVolName == "PostContainerPlaneLog" 
+    && logicalVolumeName != "PostContainerPlaneLog") {
+    if (particleName == "gamma" && pz < 0) {
+        fEventAction->RecordPostContainerPhotonBackward(kineticEnergy);
+    }
+}
+\end{verbatim}
+
+\paragraph{Électrons rétrodiffusés (depuis l'eau)}
+\begin{itemize}
+\item \textbf{Type de particule} : électron ($e^-$)
+\item \textbf{Direction} : $p_z < 0$ (depuis l'eau, direction -z)
+\end{itemize}
+
+\begin{verbatim}
+if (postLogVolName == "PostContainerPlaneLog" 
+    && logicalVolumeName != "PostContainerPlaneLog") {
+    if (particleName == "e-" && pz < 0) {
+        fEventAction->RecordPostContainerElectronBackward(kineticEnergy);
+    }
+}
+\end{verbatim}
+
+\paragraph{Électrons vers l'eau}
+\begin{itemize}
+\item \textbf{Type de particule} : électron ($e^-$)
+\item \textbf{Direction} : $p_z > 0$ (vers l'eau, direction +z)
+\end{itemize}
+
+\begin{verbatim}
+if (postLogVolName == "PostContainerPlaneLog" 
+    && logicalVolumeName != "PostContainerPlaneLog") {
+    if (particleName == "e-" && pz > 0) {
+        fEventAction->RecordPostContainerElectronForward(kineticEnergy);
+    }
+}
+\end{verbatim}
+
+\vspace{0.5cm}
+\begin{tcolorbox}[colback=gray!10,colframe=gray!80!black,title=\textbf{Remarques importantes}]
+\begin{itemize}
+    \item Le plan \textbf{PostContainerPlane} est en \textbf{W/PETG} (même matériau que le container). Les particules traversant ce plan peuvent donc interagir avec le matériau du plan lui-même.
+    \item Le plan \textbf{PreContainerPlane} est en \textbf{air}, donc transparent aux particules.
+    \item Les deux plans sont collés à l'eau (\textbf{GAP = 0}).
+    \item Les données sont enregistrées \textbf{par événement} (une ligne par désintégration).
+\end{itemize}
+\end{tcolorbox}
+
+%===============================================================================
+% SCHÉMA RÉCAPITULATIF
+%===============================================================================
+
+\newpage
+\subsection*{Schéma récapitulatif des flux de particules}
+
+\begin{center}
+\begin{tikzpicture}[scale=0.8, >=latex]
+    % Axe z
+    \draw[->, thick] (-1,0) -- (12,0) node[right] {$z$ (mm)};
+    
+    % PreContainerPlane
+    \fill[orange!40] (1,-2) rectangle (2,2);
+    \draw[orange!80!black, thick] (1,-2) rectangle (2,2);
+    \node[above, font=\footnotesize] at (1.5,2.2) {PreContainer};
+    \node[below, font=\tiny] at (1.5,-2.2) {98 mm};
+    \node[below, font=\tiny, orange!80!black] at (1.5,-2.7) {(Air)};
+    
+    % Eau
+    \fill[blue!30] (3,-2) rectangle (7,2);
+    \draw[blue!70!black, thick] (3,-2) rectangle (7,2);
+    \node[font=\footnotesize] at (5,0) {\textbf{EAU}};
+    \node[below, font=\tiny] at (5,-2.2) {98.5 -- 103.5 mm};
+    
+    % PostContainerPlane
+    \fill[violet!40] (8,-2) rectangle (9,2);
+    \draw[violet!80!black, thick] (8,-2) rectangle (9,2);
+    \node[above, font=\footnotesize] at (8.5,2.2) {PostContainer};
+    \node[below, font=\tiny] at (8.5,-2.2) {104 mm};
+    \node[below, font=\tiny, violet!80!black] at (8.5,-2.7) {(W/PETG)};
+    
+    % Flèches PreContainer
+    \draw[->, red, very thick] (-0.5,1) -- (1,1);
+    \node[above, font=\tiny, red] at (0.25,1) {$\gamma$ +z};
+    \draw[->, green!60!black, very thick] (-0.5,0) -- (1,0);
+    \node[above, font=\tiny, green!60!black] at (0.25,0) {$e^-$ +z};
+    
+    % Flèches PostContainer (backward)
+    \draw[<-, red, very thick] (7,1) -- (8,1);
+    \node[above, font=\tiny, red] at (7.5,1) {$\gamma$ -z};
+    \draw[<-, green!60!black, very thick] (7,-0.5) -- (8,-0.5);
+    \node[below, font=\tiny, green!60!black] at (7.5,-0.5) {$e^-$ -z};
+    
+    % Flèches PostContainer (forward)
+    \draw[->, green!60!black, very thick] (9,0.5) -- (10.5,0.5);
+    \node[above, font=\tiny, green!60!black] at (9.75,0.5) {$e^-$ +z};
+    
+    % Source
+    \draw[->, black, very thick] (-2,0) -- (-1,0);
+    \node[left, font=\footnotesize] at (-2,0) {Source};
+    
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.5cm}
+
+\begin{table}[H]
+\centering
+\caption{Récapitulatif des variables par plan}
+\begin{tabular}{lll}
+\toprule
+\textbf{Plan} & \textbf{Particule} & \textbf{Variables} \\
+\midrule
+\multirow{2}{*}{PreContainerPlane} & $\gamma$ vers eau (+z) & \texttt{nPhotons}, \texttt{sumEPhotons\_keV} \\
+                                    & $e^-$ vers eau (+z) & \texttt{nElectrons}, \texttt{sumEElectrons\_keV} \\
+\midrule
+\multirow{3}{*}{PostContainerPlane} & $\gamma$ depuis eau (-z) & \texttt{nPhotons\_back}, \texttt{sumEPhotons\_back\_keV} \\
+                                     & $e^-$ depuis eau (-z) & \texttt{nElectrons\_back}, \texttt{sumEElectrons\_back\_keV} \\
+                                     & $e^-$ vers eau (+z) & \texttt{nElectrons\_fwd}, \texttt{sumEElectrons\_fwd\_keV} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\end{document}

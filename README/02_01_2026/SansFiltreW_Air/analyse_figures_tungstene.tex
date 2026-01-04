@@ -1,0 +1,435 @@
+\documentclass[11pt,a4paper]{article}
+
+% ═══════════════════════════════════════════════════════════════
+% PACKAGES
+% ═══════════════════════════════════════════════════════════════
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french, provide=*]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{siunitx}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{enumitem}
+
+% ═══════════════════════════════════════════════════════════════
+% CONFIGURATION
+% ═══════════════════════════════════════════════════════════════
+\geometry{margin=2.5cm}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!70!black,
+    urlcolor=blue!70!black
+}
+
+\sisetup{
+    locale = FR,
+    per-mode = symbol,
+    separate-uncertainty = true
+}
+
+% En-tête et pied de page
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Simulation Geant4 -- Analyse des Figures}
+\fancyhead[R]{\small \today}
+\fancyfoot[C]{\thepage}
+
+% Couleurs personnalisées
+\definecolor{precolor}{RGB}{255, 200, 150}
+\definecolor{postcolor}{RGB}{150, 220, 255}
+\definecolor{backcolor}{RGB}{255, 200, 255}
+\definecolor{electroncolor}{RGB}{200, 255, 200}
+
+% ═══════════════════════════════════════════════════════════════
+% DOCUMENT
+% ═══════════════════════════════════════════════════════════════
+\begin{document}
+
+% ───────────────────────────────────────────────────────────────
+% TITRE
+% ───────────────────────────────────────────────────────────────
+\begin{center}
+    {\LARGE\bfseries Analyse des Figures de Simulation\\[0.3em]
+    Feuille de Tungstène 20~µm}\\[1.5em]
+    {\large Simulation Geant4 -- Source ${}^{152}$Eu -- $25\times 10^6$ événements}\\[0.5em]
+    {\small \today}
+\end{center}
+
+\vspace{1em}
+
+% ═══════════════════════════════════════════════════════════════
+\section{Figure 1 : PreContainer (particules entrant dans l'eau)}
+% ═══════════════════════════════════════════════════════════════
+
+Cette figure présente 4 histogrammes pour les particules traversant le PreContainerPlane (direction $+z$, entrant dans l'eau).
+
+\subsection{Photons entrant}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lc}
+\toprule
+\textbf{Paramètre} & \textbf{Valeur} \\
+\midrule
+Entries & $2.5\times 10^{7}$ \\
+Mean $\langle N_\gamma \rangle$ & 1.155 \\
+Std Dev & 0.9902 \\
+\midrule
+Entries (énergie $> 0$) & $2.79\times 10^{7}$ \\
+Énergie moyenne & \SI{1124}{keV} \\
+Std Dev énergie & \SI{783.4}{keV} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Analyse :}
+\begin{itemize}[noitemsep]
+    \item \textbf{Distribution} : Pic principal à $N_\gamma = 1$, décroissance jusqu'à $N_\gamma \approx 8$.
+    \item \textbf{Interprétation} : En moyenne $\sim 1.15$ photon par désintégration de ${}^{152}$Eu entre dans la région d'eau.
+    \item \textbf{Spectre d'énergie} : Distribution large de 0 à $\sim$7000~keV, reflétant le spectre multi-raies de l'Eu-152.
+\end{itemize}
+
+\subsection{Électrons entrant}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lc}
+\toprule
+\textbf{Paramètre} & \textbf{Valeur} \\
+\midrule
+Entries & $2.5\times 10^{7}$ \\
+Mean $\langle N_{e^-} \rangle$ & $3.985\times 10^{-4}$ \\
+Std Dev & 0.02076 \\
+\midrule
+Entries (énergie $> 0$) & 9\,607 \\
+Énergie moyenne & \SI{346}{keV} \\
+Std Dev énergie & \SI{333.4}{keV} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Analyse :}
+\begin{itemize}[noitemsep]
+    \item \textbf{Distribution} : Très majoritairement $N_{e^-} = 0$, quelques événements avec 1--4 électrons.
+    \item \textbf{Taux} : Seulement 9\,607 événements sur 25 millions ont au moins un électron.
+    \item \textbf{Interprétation} : Électrons secondaires créés en amont (Compton, photoélectrique dans le filtre/PMMA actuellement en air).
+\end{itemize}
+
+% ═══════════════════════════════════════════════════════════════
+\section{Figure 2 : PostContainer -- Photons transmis}
+% ═══════════════════════════════════════════════════════════════
+
+\subsection{Nombre de photons transmis}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lc}
+\toprule
+\textbf{Paramètre} & \textbf{Valeur} \\
+\midrule
+Entries & $2.5\times 10^{7}$ \\
+Mean $\langle N_\gamma \rangle$ & 1.027 \\
+Std Dev & 0.9432 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Comparaison avec PreContainer :}
+\begin{itemize}[noitemsep]
+    \item Mean passe de 1.155 à 1.027, soit une \textbf{perte de 11\%}.
+    \item Cette perte est due à l'échappement latéral ($\sim$10\%), au backscatter ($\sim$0.8\%) et à l'absorption ($<$0.1\%).
+\end{itemize}
+
+\subsection{Spectre d'énergie des photons transmis}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lc}
+\toprule
+\textbf{Paramètre} & \textbf{Valeur} \\
+\midrule
+Entries & $2.57\times 10^{7}$ \\
+Énergie moyenne & \SI{1069}{keV} \\
+Std Dev & \SI{750.7}{keV} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Analyse :}
+\begin{itemize}[noitemsep]
+    \item \textbf{Structure} : Spectre quasi-identique au PreContainer (pics des raies Eu-152 visibles).
+    \item \textbf{Interprétation} : Les photons transmis conservent leur énergie car 20~µm de W est insuffisant pour une atténuation significative des photons gamma de haute énergie.
+\end{itemize}
+
+% ═══════════════════════════════════════════════════════════════
+\section{Figure 3 : PostContainer -- Photons rétrodiffusés (backscatter)}
+% ═══════════════════════════════════════════════════════════════
+
+\subsection{Nombre de photons backscatter}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lc}
+\toprule
+\textbf{Paramètre} & \textbf{Valeur} \\
+\midrule
+Entries & $2.5\times 10^{7}$ \\
+Mean $\langle N_\gamma \rangle$ & $8.114\times 10^{-3}$ \\
+Std Dev & 0.09559 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Analyse :}
+\begin{itemize}[noitemsep]
+    \item \textbf{Distribution} : Majorité à 0, pic à 1, queue jusqu'à $\sim$5 photons.
+    \item \textbf{Taux de backscatter} : $\sim$0.8\% des événements ont au moins 1 photon rétrodiffusé.
+\end{itemize}
+
+\subsection{Spectre d'énergie des photons backscatter}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lc}
+\toprule
+\textbf{Paramètre} & \textbf{Valeur} \\
+\midrule
+Entries & 189\,338 \\
+Énergie moyenne & \SI{80.74}{keV} \\
+Std Dev & \SI{63.09}{keV} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Analyse du spectre :}
+\begin{itemize}[noitemsep]
+    \item \textbf{Pic dominant à 60--80~keV} : Raies de fluorescence K du tungstène :
+    \begin{itemize}
+        \item K$_{\alpha 1}$ = 59.32~keV, K$_{\alpha 2}$ = 57.98~keV
+        \item K$_{\beta 1}$ = 67.24~keV, K$_{\beta 3}$ = 66.95~keV
+        \item K$_{\beta 2}$ = 69.10~keV
+    \end{itemize}
+    \item \textbf{Queue jusqu'à $\sim$1200~keV} : Photons Compton rétrodiffusés.
+    \item \textbf{Interprétation} : La fluorescence X du tungstène domine le spectre de backscatter, ce qui explique l'énergie moyenne basse (80.7~keV).
+\end{itemize}
+
+% ═══════════════════════════════════════════════════════════════
+\section{Figure 4 : PostContainer -- Électrons transmis}
+% ═══════════════════════════════════════════════════════════════
+
+\subsection{Nombre d'électrons transmis}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lc}
+\toprule
+\textbf{Paramètre} & \textbf{Valeur} \\
+\midrule
+Entries & $2.5\times 10^{7}$ \\
+Mean $\langle N_{e^-} \rangle$ & $4.127\times 10^{-4}$ \\
+Std Dev & 0.02104 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Comparaison avec PreContainer :}
+\begin{itemize}[noitemsep]
+    \item Mean passe de $3.985\times 10^{-4}$ à $4.127\times 10^{-4}$, soit une \textbf{augmentation de 4\%}.
+    \item \textbf{Interprétation} : Production nette d'électrons dans le tungstène (effet photoélectrique, Compton).
+\end{itemize}
+
+\subsection{Spectre d'énergie des électrons transmis}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lc}
+\toprule
+\textbf{Paramètre} & \textbf{Valeur} \\
+\midrule
+Entries & 9\,973 \\
+Énergie moyenne & \SI{290.5}{keV} \\
+Std Dev & \SI{281.4}{keV} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Analyse du spectre :}
+\begin{itemize}[noitemsep]
+    \item \textbf{Pic à basse énergie (50--150~keV)} : Électrons ayant perdu de l'énergie dans le tungstène.
+    \item \textbf{Distribution jusqu'à $\sim$1000~keV} : Électrons Compton de haute énergie.
+    \item \textbf{Énergie moyenne réduite} : 290~keV vs 346~keV au PreContainer (\textbf{--16\%}).
+    \item \textbf{Interprétation} : Les électrons perdent de l'énergie en traversant le tungstène par ionisation et rayonnement de freinage.
+\end{itemize}
+
+% ═══════════════════════════════════════════════════════════════
+\section{Figure 5 : PostContainer -- Électrons rétrodiffusés (backscatter)}
+% ═══════════════════════════════════════════════════════════════
+
+\subsection{Nombre d'électrons backscatter}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lc}
+\toprule
+\textbf{Paramètre} & \textbf{Valeur} \\
+\midrule
+Entries & $2.5\times 10^{7}$ \\
+Mean $\langle N_{e^-} \rangle$ & $1.662\times 10^{-3}$ \\
+Std Dev & 0.04527 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Analyse :}
+\begin{itemize}[noitemsep]
+    \item \textbf{Distribution} : Pic à 0, décroissance jusqu'à $\sim$7 électrons.
+    \item \textbf{Taux} : $\sim$0.17\% des événements ont au moins 1 électron rétrodiffusé.
+    \item \textbf{Comparaison Air$\rightarrow$W} : Facteur $\times 137$ (de $1.21\times 10^{-5}$ à $1.66\times 10^{-3}$).
+\end{itemize}
+
+\subsection{Spectre d'énergie des électrons backscatter}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lc}
+\toprule
+\textbf{Paramètre} & \textbf{Valeur} \\
+\midrule
+Entries & 37\,350 \\
+Énergie moyenne & \SI{156}{keV} \\
+Std Dev & \SI{179.4}{keV} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Analyse du spectre :}
+\begin{itemize}[noitemsep]
+    \item \textbf{Pic principal à $\sim$100--150~keV} : Photoélectrons et électrons Compton rétrodiffusés.
+    \item \textbf{Queue étendue jusqu'à $\sim$1800~keV} : Électrons de haute énergie.
+    \item \textbf{Distribution large} : Plus étendue que pour les photons backscatter.
+    \item \textbf{Interprétation} : Le tungstène (Z=74) possède un coefficient de rétrodiffusion électronique élevé ($\sim$50\% pour des électrons de quelques centaines de keV).
+\end{itemize}
+
+% ═══════════════════════════════════════════════════════════════
+\section{Figure 6 : Comparaison PreContainer vs PostContainer (Photons)}
+% ═══════════════════════════════════════════════════════════════
+
+Cette figure superpose les distributions du PreContainer (orange) et du PostContainer (cyan) pour les photons.
+
+\subsection{Comparaison du nombre de photons}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lcc}
+\toprule
+\textbf{Plan} & \textbf{Mean} & \textbf{Std Dev} \\
+\midrule
+\rowcolor{precolor}
+PreContainer (orange) & 1.155 & 0.9902 \\
+\rowcolor{postcolor}
+PostContainer (cyan) & 1.027 & 0.9432 \\
+\midrule
+\textbf{Perte} & \multicolumn{2}{c}{\textbf{11.1\%}} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Causes de la perte :}
+\begin{itemize}[noitemsep]
+    \item Échappement latéral : $\sim$10\%
+    \item Backscatter : $\sim$0.8\%
+    \item Absorption : $<$0.1\%
+\end{itemize}
+
+\subsection{Comparaison des spectres d'énergie}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lccc}
+\toprule
+\textbf{Plan} & \textbf{Entries} & \textbf{Mean} & \textbf{Std Dev} \\
+\midrule
+\rowcolor{precolor}
+PreContainer & $2.79\times 10^{7}$ & \SI{1124}{keV} & \SI{783.4}{keV} \\
+\rowcolor{postcolor}
+PostContainer & $2.57\times 10^{7}$ & \SI{1069}{keV} & \SI{750.7}{keV} \\
+\midrule
+\textbf{Variation} & $-7.9\%$ & $-4.9\%$ & $-4.2\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Analyse :}
+\begin{itemize}[noitemsep]
+    \item \textbf{Les deux spectres sont quasi-superposés} : Pas de modification significative de la forme spectrale.
+    \item \textbf{Perte d'énergie moyenne} : $(1124 - 1069) / 1124 = 4.9\%$.
+    \item \textbf{Interprétation} : La feuille de 20~µm de W est transparente aux photons gamma de haute énergie. Le libre parcours moyen dans le tungstène pour des photons de 500~keV est de l'ordre de 4~mm, soit 200 fois l'épaisseur de la feuille.
+\end{itemize}
+
+% ═══════════════════════════════════════════════════════════════
+\section{Tableau récapitulatif des statistiques}
+% ═══════════════════════════════════════════════════════════════
+
+\begin{table}[H]
+\centering
+\caption{Synthèse des statistiques pour toutes les figures}
+\begin{tabular}{llcccc}
+\toprule
+\textbf{Figure} & \textbf{Particule} & \textbf{Direction} & \textbf{Mean} & \textbf{Entries (E$>$0)} & \textbf{$\langle$E$\rangle$} \\
+\midrule
+\rowcolor{precolor}
+PreContainer & Photons & $+z$ & 1.155 & $2.79\times 10^{7}$ & \SI{1124}{keV} \\
+\rowcolor{precolor}
+PreContainer & Électrons & $+z$ & $3.99\times 10^{-4}$ & 9\,607 & \SI{346}{keV} \\
+\midrule
+\rowcolor{postcolor}
+PostContainer & Photons transmis & $+z$ & 1.027 & $2.57\times 10^{7}$ & \SI{1069}{keV} \\
+\rowcolor{backcolor}
+PostContainer & Photons backscatter & $-z$ & $8.11\times 10^{-3}$ & 189\,338 & \textbf{\SI{80.7}{keV}} \\
+\midrule
+\rowcolor{electroncolor}
+PostContainer & Électrons transmis & $+z$ & $4.13\times 10^{-4}$ & 9\,973 & \SI{290}{keV} \\
+\rowcolor{backcolor}
+PostContainer & Électrons backscatter & $-z$ & $1.66\times 10^{-3}$ & 37\,350 & \textbf{\SI{156}{keV}} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ═══════════════════════════════════════════════════════════════
+\section{Conclusions de l'analyse des figures}
+% ═══════════════════════════════════════════════════════════════
+
+\begin{enumerate}
+    \item \textbf{Fluorescence X du tungstène} : Le pic à 60--80~keV dans le spectre des photons backscatter est la signature caractéristique des raies K du tungstène (K$_\alpha$ à 58--59~keV, K$_\beta$ à 67--69~keV).
+    
+    \item \textbf{Backscatter significatif} : $\sim$189\,000 photons et $\sim$37\,000 électrons rétrodiffusés sur 25 millions d'événements, soit des taux de 0.8\% et 0.17\% respectivement.
+    
+    \item \textbf{Transmission élevée} : La feuille de 20~µm de W laisse passer $>$99\% des photons gamma incidents. La perte de 11\% observée est principalement due à l'échappement latéral géométrique.
+    
+    \item \textbf{Production d'électrons secondaires} : Le tungstène génère des électrons par effet photoélectrique et Compton, visible dans l'augmentation de 4\% du nombre d'électrons transmis par rapport au PreContainer.
+    
+    \item \textbf{Cohérence physique} : Les spectres d'énergie sont conformes aux attentes théoriques pour les interactions photon-matière dans un matériau de Z élevé :
+    \begin{itemize}
+        \item Fluorescence X dominante dans le backscatter photon
+        \item Coefficient de rétrodiffusion électronique élevé ($\sim$50\%)
+        \item Perte d'énergie des électrons transmis par ionisation
+    \end{itemize}
+\end{enumerate}
+
+\vspace{1em}
+\noindent\fbox{\parbox{\textwidth}{
+\textbf{Remarque :} Ces résultats valident le bon fonctionnement de la simulation et confirment que la feuille de tungstène de 20~µm produit un backscatter significatif de photons (dominé par la fluorescence X) et d'électrons, tout en laissant passer la quasi-totalité du flux gamma incident.
+}}
+
+\end{document}

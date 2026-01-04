@@ -1,0 +1,148 @@
+\documentclass[11pt,a4paper]{article}
+
+% ═══════════════════════════════════════════════════════════════
+% PACKAGES
+% ═══════════════════════════════════════════════════════════════
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french, provide=*]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{siunitx}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{caption}
+\usepackage{hyperref}
+\usepackage{float}
+
+% ═══════════════════════════════════════════════════════════════
+% CONFIGURATION
+% ═══════════════════════════════════════════════════════════════
+\geometry{margin=2.5cm}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!70!black,
+    urlcolor=blue!70!black
+}
+
+\sisetup{
+    locale = FR,
+    per-mode = symbol,
+    separate-uncertainty = true
+}
+
+% En-tête et pied de page
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Simulation Geant4 -- Comparaison Air/Tungstène}
+\fancyhead[R]{\small \today}
+\fancyfoot[C]{\thepage}
+
+% Couleurs personnalisées
+\definecolor{aircolor}{RGB}{200, 220, 255}
+\definecolor{tungcolor}{RGB}{255, 220, 200}
+\definecolor{ratiocolor}{RGB}{220, 255, 220}
+
+% ═══════════════════════════════════════════════════════════════
+% DOCUMENT
+% ═══════════════════════════════════════════════════════════════
+\begin{document}
+
+% ───────────────────────────────────────────────────────────────
+% TITRE
+% ───────────────────────────────────────────────────────────────
+\begin{center}
+    {\LARGE\bfseries Comparaison des Résultats de Simulation\\[0.3em]
+    Feuille de 20~µm : Air vs Tungstène}\\[1.5em]
+    {\large Simulation Geant4 -- Source ${}^{152}$Eu -- 25$\times 10^6$ événements}\\[0.5em]
+    {\small \today}
+\end{center}
+
+\vspace{1em}
+
+% ═══════════════════════════════════════════════════════════════
+\section{Configuration des simulations}
+% ═══════════════════════════════════════════════════════════════
+
+
+
+
+\paragraph{Interprétation :}
+
+\subsection{Photons transmis (direction $+z$)}
+
+\begin{table}[H]
+\centering
+\caption{Statistiques des photons transmis au PostContainerPlane}
+\begin{tabular}{l>{\columncolor{aircolor}}c>{\columncolor{tungcolor}}c>{\columncolor{ratiocolor}}c}
+\toprule
+\textbf{Observable} & \textbf{Air} & \textbf{Tungstène} & \textbf{Ratio W/Air} \\
+\midrule
+Nombre moyen $\bm{\langle N_\gamma \rangle}$ & \num{1.028} & \num{1.027} & $\sim 1.00$ \\
+Écart-type $\bm{\sigma}$ & \num{0.943} & \num{0.943} & $\sim 1.00$ \\
+Énergie moyenne $\bm{\langle \Sigma E_\gamma \rangle}$ & \SI{1069}{keV} & \SI{1069}{keV} & $\sim 1.00$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Interprétation :}
+La transmission des photons est quasi-identique car l'épaisseur de 20~µm de tungstène est très faible par rapport au libre parcours moyen des photons gamma de haute énergie ($\lambda \gg 20$~µm pour $E_\gamma > 100$~keV).
+
+
+% ═══════════════════════════════════════════════════════════════
+\section{Tableau récapitulatif}
+% ═══════════════════════════════════════════════════════════════
+
+\begin{table}[H]
+\centering
+\caption{Synthèse de la comparaison Air vs Tungstène (feuille 20~µm)}
+\begin{tabular}{llccc}
+\toprule
+\textbf{Catégorie} & \textbf{Observable} & \textbf{Air} & \textbf{Tungstène} & \textbf{Ratio} \\
+\midrule
+\multirow{3}{*}{\textbf{Photons backscatter}} 
+    & Nombre moyen & \num{8.29e-5} & \num{8.11e-3} & $\times 98$ \\
+    & Énergie moyenne & \SI{153}{keV} & \SI{80.7}{keV} & $\times 0.53$ \\
+    & Événements & $\sim 2\,000$ & $\sim 189\,000$ & $\times 95$ \\
+\midrule
+\multirow{3}{*}{\textbf{Électrons backscatter}} 
+    & Nombre moyen & \num{1.21e-5} & \num{1.66e-3} & $\times 137$ \\
+    & Énergie moyenne & \SI{35}{keV} & \SI{156}{keV} & $\times 4.5$ \\
+    & Événements & $\sim 300$ & $\sim 37\,000$ & $\times 123$ \\
+\midrule
+\multirow{2}{*}{\textbf{Photons transmis}} 
+    & Nombre moyen & \num{1.028} & \num{1.027} & $\sim 1.0$ \\
+    & Énergie moyenne & \SI{1069}{keV} & \SI{1069}{keV} & $\sim 1.0$ \\
+\midrule
+\multirow{2}{*}{\textbf{Électrons transmis}} 
+    & Nombre moyen & \num{3.25e-4} & \num{4.13e-4} & $\times 1.27$ \\
+    & Énergie moyenne & \SI{364}{keV} & \SI{290}{keV} & $\times 0.80$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ═══════════════════════════════════════════════════════════════
+\section{Conclusion}
+% ═══════════════════════════════════════════════════════════════
+
+La comparaison entre les deux configurations démontre clairement l'effet du tungstène :
+
+\begin{enumerate}
+    \item \textbf{Backscatter multiplié par $\sim 100$} : Le tungstène (Z=74) est un excellent rétrodiffuseur comparé à l'air (Z$_{\text{eff}} \approx 7.4$). Le rapport des sections efficaces d'interaction évolue approximativement comme $Z^2$ pour l'effet photoélectrique et $Z$ pour l'effet Compton.
+    
+    \item \textbf{Fluorescence X visible} : Le pic à 60-80~keV dans le spectre des photons backscatter correspond aux raies K$_\alpha$ et K$_\beta$ du tungstène, signature caractéristique de ce matériau.
+    
+    \item \textbf{Transmission quasi-inchangée} : L'épaisseur de 20~µm est insuffisante pour atténuer significativement les photons gamma. Le libre parcours moyen dans le tungstène pour des photons de 500~keV est de l'ordre de 4~mm, soit 200 fois l'épaisseur de la feuille.
+    
+    \item \textbf{Production d'électrons secondaires} : Le tungstène génère beaucoup plus d'électrons par effet photoélectrique et Compton, avec des énergies plus élevées que dans l'air.
+\end{enumerate}
+
+\vspace{1em}
+\noindent Ces résultats valident le bon fonctionnement de la simulation et confirment que la feuille de tungstène de 20~µm produit un backscatter significatif de photons et d'électrons, tout en laissant passer la quasi-totalité du flux gamma incident.
+
+\end{document}

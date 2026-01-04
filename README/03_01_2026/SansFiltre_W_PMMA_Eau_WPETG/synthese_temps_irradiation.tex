@@ -1,0 +1,204 @@
+\documentclass[11pt,a4paper]{article}
+
+% ═══════════════════════════════════════════════════════════════════════════════
+% PACKAGES
+% ═══════════════════════════════════════════════════════════════════════════════
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage{geometry}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{float}
+
+\geometry{margin=2.5cm}
+\sisetup{locale=FR, separate-uncertainty=true}
+
+% En-têtes
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{Source Eu-152 -- Calcul dosimétrique}
+\lhead{Temps d'irradiation}
+\rfoot{Page \thepage}
+
+% ═══════════════════════════════════════════════════════════════════════════════
+% DOCUMENT
+% ═══════════════════════════════════════════════════════════════════════════════
+
+\begin{document}
+
+\title{\textbf{Estimation des temps d'irradiation\\pour une source d'Europium-152}}
+\author{Dispositif Puits Couronne}
+\date{\today}
+\maketitle
+
+% ═══════════════════════════════════════════════════════════════════════════════
+\section{Paramètres de la simulation}
+% ═══════════════════════════════════════════════════════════════════════════════
+
+Les paramètres dosimétriques ont été déterminés par simulation Monte Carlo Geant4 avec 25 millions de désintégrations d'Europium-152.
+
+\begin{table}[H]
+\centering
+\caption{Paramètres dosimétriques issus de la simulation}
+\begin{tabular}{@{}lr@{}}
+\toprule
+\textbf{Paramètre} & \textbf{Valeur} \\
+\midrule
+Dose moyenne par désintégration (anneau central) & \SI{7e-2}{nGy/désintégration} \\
+Activité de la source (novembre 2025) & \SI{42.4}{kBq} \\
+Demi-vie de l'Europium-152 & 13.517 ans \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ═══════════════════════════════════════════════════════════════════════════════
+\section{Méthodologie de calcul}
+% ═══════════════════════════════════════════════════════════════════════════════
+
+\subsection{Conversion d'unités}
+
+La conversion entre nanogray (nGy) et centigray (cGy) s'effectue selon :
+\begin{equation}
+1~\text{nGy} = 10^{-9}~\text{Gy} = 10^{-7}~\text{cGy}
+\end{equation}
+
+Ainsi, pour une dose cible $D_{\text{cible}}$ exprimée en cGy :
+\begin{equation}
+D_{\text{cible}}~(\text{nGy}) = D_{\text{cible}}~(\text{cGy}) \times 10^{7}
+\end{equation}
+
+\subsection{Nombre de désintégrations nécessaires}
+
+Le nombre de désintégrations $N$ requis pour atteindre une dose cible est :
+\begin{equation}
+N = \frac{D_{\text{cible}}}{\dot{D}} = \frac{D_{\text{cible}}~(\text{cGy}) \times 10^{7}}{\SI{7e-2}{nGy}}
+\end{equation}
+
+\textbf{Application numérique pour 50 cGy :}
+\begin{equation}
+N = \frac{50 \times 10^{7}}{7 \times 10^{-2}} = \frac{5 \times 10^{8}}{7 \times 10^{-2}} = 7.14 \times 10^{9}~\text{désintégrations}
+\end{equation}
+
+\subsection{Temps d'irradiation}
+
+Le temps d'irradiation $t$ est donné par :
+\begin{equation}
+t = \frac{N}{A}
+\end{equation}
+
+où $A$ est l'activité de la source en Becquerel (Bq = désintégrations/seconde).
+
+\subsection{Correction de décroissance radioactive}
+
+L'activité décroît selon :
+\begin{equation}
+A(t) = A_0 \times e^{-\frac{\ln 2}{T_{1/2}} \times t}
+\end{equation}
+
+Pour l'Europium-152 ($T_{1/2} = 13.517$ ans), la décroissance sur 2 mois est négligeable ($<1\%$). On utilise donc $A \approx \SI{42.4}{kBq} = \SI{4.24e4}{Bq}$.
+
+% ═══════════════════════════════════════════════════════════════════════════════
+\section{Résultats}
+% ═══════════════════════════════════════════════════════════════════════════════
+
+\subsection{Calcul pour 50 cGy}
+
+\begin{equation}
+t_{50~\text{cGy}} = \frac{7.14 \times 10^{9}}{4.24 \times 10^{4}} = 1.68 \times 10^{5}~\text{s} \approx \boxed{47~\text{heures} \approx 2~\text{jours}}
+\end{equation}
+
+\subsection{Calcul pour 5 cGy}
+
+\begin{equation}
+t_{5~\text{cGy}} = \frac{t_{50~\text{cGy}}}{10} = \frac{47}{10} = \boxed{4.7~\text{heures} \approx 4\text{h}~42\text{min}}
+\end{equation}
+
+\subsection{Tableau récapitulatif}
+
+\begin{table}[H]
+\centering
+\caption{Temps d'irradiation en fonction de la dose cible (A = \SI{42.4}{kBq})}
+\label{tab:temps_irradiation}
+\begin{tabular}{@{}cccc@{}}
+\toprule
+\textbf{Dose cible} & \textbf{Dose cible} & \textbf{Désintégrations} & \textbf{Temps d'irradiation} \\
+(cGy) & (nGy) & nécessaires & \\
+\midrule
+0.5  & $5 \times 10^{6}$  & $7.1 \times 10^{8}$  & 28 min \\
+1    & $1 \times 10^{7}$  & $1.4 \times 10^{9}$  & 56 min \\
+5    & $5 \times 10^{7}$  & $7.1 \times 10^{9}$  & \textbf{4 h 42 min} \\
+10   & $1 \times 10^{8}$  & $1.4 \times 10^{10}$ & 9 h 24 min \\
+20   & $2 \times 10^{8}$  & $2.9 \times 10^{10}$ & 18 h 48 min \\
+50   & $5 \times 10^{8}$  & $7.1 \times 10^{10}$ & \textbf{47 h (2 jours)} \\
+100  & $1 \times 10^{9}$  & $1.4 \times 10^{11}$ & 94 h (4 jours) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Débit de dose}
+
+Le débit de dose pour la source de \SI{42.4}{kBq} est :
+\begin{equation}
+\dot{D} = A \times D_{\text{par désint.}} = 4.24 \times 10^{4} \times 7 \times 10^{-2} = 2.97 \times 10^{3}~\text{nGy/s}
+\end{equation}
+
+Soit en unités plus pratiques :
+\begin{equation}
+\dot{D} = 2.97 \times 10^{3} \times 10^{-7} \times 3600 = \boxed{1.07~\text{cGy/h}}
+\end{equation}
+
+% ═══════════════════════════════════════════════════════════════════════════════
+\section{Formules pratiques}
+% ═══════════════════════════════════════════════════════════════════════════════
+
+Pour une source d'Europium-152 de \SI{42.4}{kBq} et le dispositif puits couronne simulé :
+
+\begin{center}
+\fbox{
+\parbox{0.8\textwidth}{
+\centering
+\textbf{Débit de dose :} $\dot{D} \approx \SI{1.07}{cGy/h}$
+
+\vspace{0.3cm}
+
+\textbf{Temps d'irradiation :} $t~(\text{h}) = \dfrac{D_{\text{cible}}~(\text{cGy})}{1.07}$
+
+\vspace{0.3cm}
+
+\textbf{Règle simplifiée :} $t \approx D_{\text{cible}}~(\text{cGy})$ en heures
+}
+}
+\end{center}
+
+\vspace{0.5cm}
+
+\textbf{Exemples :}
+\begin{itemize}
+    \item Pour 5 cGy : $t \approx 5$ heures
+    \item Pour 10 cGy : $t \approx 10$ heures
+    \item Pour 50 cGy : $t \approx 50$ heures $\approx$ 2 jours
+\end{itemize}
+
+% ═══════════════════════════════════════════════════════════════════════════════
+\section{Remarques}
+% ═══════════════════════════════════════════════════════════════════════════════
+
+\begin{enumerate}
+    \item Ces calculs sont basés sur la dose dans l'anneau central (r = 0-5 mm). La dose est quasi-uniforme sur l'ensemble des anneaux (variation $<6\%$).
+    
+    \item L'activité de la source doit être corrigée si l'irradiation a lieu plusieurs mois/années après novembre 2025. Le facteur de correction est :
+    \begin{equation}
+        f = e^{-\frac{0.693}{13.517} \times \Delta t~(\text{ans})} \approx e^{-0.0513 \times \Delta t}
+    \end{equation}
+    
+    \item Pour une activité différente $A'$, le temps d'irradiation se calcule par :
+    \begin{equation}
+        t' = t \times \frac{42.4~\text{kBq}}{A'}
+    \end{equation}
+\end{enumerate}
+
+\end{document}

@@ -1,0 +1,336 @@
+\documentclass[11pt,a4paper]{article}
+
+% ═══════════════════════════════════════════════════════════════════════════════
+% PACKAGES
+% ═══════════════════════════════════════════════════════════════════════════════
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage{geometry}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{float}
+\usepackage{caption}
+
+\geometry{margin=2cm}
+\sisetup{locale=FR}
+
+\usetikzlibrary{patterns, arrows.meta, decorations.pathreplacing, calc, positioning}
+
+% ═══════════════════════════════════════════════════════════════════════════════
+% DOCUMENT
+% ═══════════════════════════════════════════════════════════════════════════════
+
+\begin{document}
+
+\title{\textbf{Géométrie du dispositif Puits Couronne}\\[0.3cm]
+\large Configuration avec PMMA 10 mm en contact direct avec l'eau\\[0.2cm]
+\normalsize (Build-up électronique optimisé)}
+\author{Simulation Geant4}
+\date{\today}
+\maketitle
+
+% ═══════════════════════════════════════════════════════════════════════════════
+\section{Objectif de la modification}
+% ═══════════════════════════════════════════════════════════════════════════════
+
+Pour optimiser le build-up électronique et augmenter la dose déposée dans l'eau, la géométrie a été modifiée :
+
+\begin{itemize}
+    \item \textbf{PMMA en contact direct} avec la face inférieure de l'eau (plus de gap d'air)
+    \item \textbf{PreContainerPlane} intégré dans le début de l'eau (chevauchement autorisé)
+    \item Les électrons secondaires créés dans le PMMA peuvent maintenant atteindre l'eau directement
+\end{itemize}
+
+% ═══════════════════════════════════════════════════════════════════════════════
+\section{Schéma de la géométrie}
+% ═══════════════════════════════════════════════════════════════════════════════
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.12, >=Stealth]
+
+    % ═══════════════════════════════════════════════════════════════════════════
+    % DÉFINITION DES COULEURS
+    % ═══════════════════════════════════════════════════════════════════════════
+    \definecolor{sourcecolor}{RGB}{255, 50, 50}
+    \definecolor{filtercolor}{RGB}{120, 120, 140}
+    \definecolor{containercolor}{RGB}{100, 100, 115}
+    \definecolor{pmmacolor}{RGB}{255, 180, 100}
+    \definecolor{watercolor}{RGB}{100, 150, 255}
+    \definecolor{tungstencolor}{RGB}{60, 60, 60}
+    \definecolor{precontainercolor}{RGB}{255, 140, 0}
+    \definecolor{postcontainercolor}{RGB}{150, 0, 150}
+    \definecolor{contactcolor}{RGB}{0, 200, 0}
+
+    % ═══════════════════════════════════════════════════════════════════════════
+    % AXE Z (vertical)
+    % ═══════════════════════════════════════════════════════════════════════════
+    \draw[->, thick] (-45, 80) -- (-45, 115) node[above] {$z$ (mm)};
+    
+    % Graduations
+    \foreach \z in {85, 90, 95, 100, 105, 110} {
+        \draw (-46, \z) -- (-44, \z);
+        \node[left] at (-46, \z) {\footnotesize \z};
+    }
+
+    % ═══════════════════════════════════════════════════════════════════════════
+    % PMMA (z = 88.5 - 98.5 mm) - 10 mm EN CONTACT DIRECT
+    % ═══════════════════════════════════════════════════════════════════════════
+    \fill[pmmacolor, opacity=0.7] (-25, 88.5) rectangle (25, 98.5);
+    \draw[black, thick] (-25, 88.5) rectangle (25, 98.5);
+    \node[right] at (28, 93.5) {\footnotesize \textbf{PMMA (10 mm)}};
+    
+    % Cotation PMMA
+    \draw[<->, thin] (-30, 88.5) -- (-30, 98.5);
+    \node[left] at (-30, 93.5) {\tiny 10};
+
+    % ═══════════════════════════════════════════════════════════════════════════
+    % ZONE DE CONTACT PMMA-EAU (ligne verte épaisse)
+    % ═══════════════════════════════════════════════════════════════════════════
+    \draw[contactcolor, line width=3pt] (-25, 98.5) -- (25, 98.5);
+    \node[contactcolor, right] at (28, 98.5) {\footnotesize \textbf{CONTACT DIRECT}};
+
+    % ═══════════════════════════════════════════════════════════════════════════
+    % PreContainerPlane (z = 98.5 - 99.5 mm) - DANS L'EAU
+    % ═══════════════════════════════════════════════════════════════════════════
+    \fill[precontainercolor, opacity=0.5] (-25, 98.5) rectangle (25, 99.5);
+    \draw[precontainercolor, thick, dashed] (-25, 98.5) rectangle (25, 99.5);
+    \node[left] at (-28, 99) {\footnotesize PreContainer};
+    \node[left] at (-28, 98) {\footnotesize (dans eau)};
+
+    % ═══════════════════════════════════════════════════════════════════════════
+    % EAU - 5 anneaux (z = 98.5 - 103.5 mm)
+    % ═══════════════════════════════════════════════════════════════════════════
+    % Anneau 0 (r = 0-5 mm)
+    \fill[watercolor!90, opacity=0.8] (-5, 98.5) rectangle (5, 103.5);
+    % Anneau 1 (r = 5-10 mm)
+    \fill[watercolor!80, opacity=0.8] (-10, 98.5) rectangle (-5, 103.5);
+    \fill[watercolor!80, opacity=0.8] (5, 98.5) rectangle (10, 103.5);
+    % Anneau 2 (r = 10-15 mm)
+    \fill[watercolor!70, opacity=0.8] (-15, 98.5) rectangle (-10, 103.5);
+    \fill[watercolor!70, opacity=0.8] (10, 98.5) rectangle (15, 103.5);
+    % Anneau 3 (r = 15-20 mm)
+    \fill[watercolor!60, opacity=0.8] (-20, 98.5) rectangle (-15, 103.5);
+    \fill[watercolor!60, opacity=0.8] (15, 98.5) rectangle (20, 103.5);
+    % Anneau 4 (r = 20-25 mm)
+    \fill[watercolor!50, opacity=0.8] (-25, 98.5) rectangle (-20, 103.5);
+    \fill[watercolor!50, opacity=0.8] (20, 98.5) rectangle (25, 103.5);
+    
+    \draw[black, thick] (-25, 98.5) rectangle (25, 103.5);
+    \node[right] at (28, 101) {\footnotesize Eau (5 mm, 5 anneaux)};
+    
+    % Cotation eau
+    \draw[<->, thin] (-30, 98.5) -- (-30, 103.5);
+    \node[left] at (-30, 101) {\tiny 5};
+
+    % ═══════════════════════════════════════════════════════════════════════════
+    % PostContainerPlane (z = 102.5 - 103.5 mm) - DANS L'EAU
+    % ═══════════════════════════════════════════════════════════════════════════
+    \fill[postcontainercolor, opacity=0.5] (-25, 102.5) rectangle (25, 103.5);
+    \draw[postcontainercolor, thick, dashed] (-25, 102.5) rectangle (25, 103.5);
+    \node[left] at (-28, 103) {\footnotesize PostContainer};
+
+    % ═══════════════════════════════════════════════════════════════════════════
+    % FEUILLE DE TUNGSTÈNE (z = 103.5 - 103.52 mm, 20 µm)
+    % ═══════════════════════════════════════════════════════════════════════════
+    \fill[tungstencolor] (-25, 103.5) rectangle (25, 104.5);  % Exagéré pour visibilité
+    \draw[black] (-25, 103.5) rectangle (25, 104.5);
+    \node[right] at (28, 104) {\footnotesize Feuille W (20 µm)};
+
+    % ═══════════════════════════════════════════════════════════════════════════
+    % CONTAINER W/PETG (parois latérales et couvercle)
+    % ═══════════════════════════════════════════════════════════════════════════
+    % Paroi gauche
+    \fill[containercolor, opacity=0.8] (-27, 96.5) rectangle (-25, 103.5);
+    % Paroi droite
+    \fill[containercolor, opacity=0.8] (25, 96.5) rectangle (27, 103.5);
+    % Couvercle
+    \fill[containercolor, opacity=0.8] (-27, 103.5) rectangle (27, 105.5);
+    
+    \draw[black, thick] (-27, 96.5) -- (-27, 105.5) -- (27, 105.5) -- (27, 96.5);
+    \draw[black, thick] (-25, 96.5) -- (-25, 103.5);
+    \draw[black, thick] (25, 96.5) -- (25, 103.5);
+
+    % ═══════════════════════════════════════════════════════════════════════════
+    % LÉGENDE
+    % ═══════════════════════════════════════════════════════════════════════════
+    \node[anchor=north west] at (-45, 85) {
+        \begin{tabular}{cl}
+            \tikz\fill[pmmacolor] (0,0) rectangle (0.4,0.2); & PMMA (build-up) \\
+            \tikz\draw[contactcolor, line width=2pt] (0,0.1) -- (0.4,0.1); & Contact direct \\
+            \tikz\fill[watercolor] (0,0) rectangle (0.4,0.2); & Eau (5 anneaux) \\
+            \tikz\fill[tungstencolor] (0,0) rectangle (0.4,0.2); & Feuille W \\
+            \tikz\fill[precontainercolor, opacity=0.5] (0,0) rectangle (0.4,0.2); & PreContainer (dans eau) \\
+            \tikz\fill[postcontainercolor, opacity=0.5] (0,0) rectangle (0.4,0.2); & PostContainer (dans eau) \\
+        \end{tabular}
+    };
+
+    % ═══════════════════════════════════════════════════════════════════════════
+    % ANNOTATIONS
+    % ═══════════════════════════════════════════════════════════════════════════
+    
+    % Accolade pour montrer le contact
+    \draw[decorate, decoration={brace, amplitude=5pt, mirror}, thick, contactcolor] 
+        (32, 88.5) -- (32, 103.5) node[midway, right=5pt, align=left] {\footnotesize PMMA + Eau\\[-1mm]\footnotesize en contact};
+    
+    % Flèche pour les électrons
+    \draw[->, thick, red, dashed] (0, 92) -- (0, 100);
+    \node[red, right] at (2, 96) {\footnotesize $e^-$ secondaires};
+    
+    % Flèche direction +z
+    \draw[->, thick, blue] (0, 108) -- (0, 113);
+    \node[blue, above] at (0, 113) {\footnotesize +z};
+
+\end{tikzpicture}
+\caption{Coupe schématique du container avec PMMA de 10 mm en contact direct avec l'eau. Les plans de comptage (PreContainer et PostContainer) sont maintenant dans l'eau (chevauchement autorisé). Les électrons secondaires créés dans le PMMA peuvent atteindre directement l'eau.}
+\label{fig:geometrie_container}
+\end{figure}
+
+% ═══════════════════════════════════════════════════════════════════════════════
+\section{Tableau des positions des éléments}
+% ═══════════════════════════════════════════════════════════════════════════════
+
+\begin{table}[H]
+\centering
+\caption{Positions axiales (z) des éléments du dispositif -- PMMA en contact direct avec l'eau}
+\label{tab:positions}
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+\textbf{Élément} & \textbf{$z_{\min}$} & \textbf{$z_{\text{centre}}$} & \textbf{$z_{\max}$} & \textbf{Épaisseur} & \textbf{Matériau} \\
+ & (mm) & (mm) & (mm) & (mm) & \\
+\midrule
+Source Eu-152 & -- & 20.0 & -- & ponctuelle & -- \\
+\midrule
+Filtre W/PETG & 37.5 & 40.0 & 42.5 & 5.0 & W/PETG 75\%/25\% \\
+\midrule
+Air (gap) & 42.5 & -- & 88.5 & 46.0 & Air \\
+\midrule
+\textbf{PMMA} & \textbf{88.5} & \textbf{93.5} & \textbf{98.5} & \textbf{10.0} & PMMA \\
+\midrule
+\multicolumn{6}{c}{\textcolor{green!50!black}{\textbf{═══ CONTACT DIRECT à z = 98.5 mm ═══}}} \\
+\midrule
+Eau (anneaux) & 98.5 & 101.0 & 103.5 & 5.0 & H$_2$O \\
+\midrule
+PreContainerPlane & 98.5 & 99.0 & 99.5 & 1.0 & H$_2$O (chevauche) \\
+\midrule
+PostContainerPlane & 102.5 & 103.0 & 103.5 & 1.0 & H$_2$O (chevauche) \\
+\midrule
+Feuille tungstène & 103.500 & 103.510 & 103.520 & 0.020 & W pur \\
+\midrule
+Container (couvercle) & 103.5 & 104.5 & 105.5 & 2.0 & W/PETG \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ═══════════════════════════════════════════════════════════════════════════════
+\section{Détails du container et des plans de comptage}
+% ═══════════════════════════════════════════════════════════════════════════════
+
+\begin{table}[H]
+\centering
+\caption{Positions détaillées des éléments du container}
+\label{tab:container}
+\begin{tabular}{@{}lccl@{}}
+\toprule
+\textbf{Élément} & \textbf{$z_{\min}$ (mm)} & \textbf{$z_{\max}$ (mm)} & \textbf{Remarque} \\
+\midrule
+\multicolumn{4}{c}{\textit{Empilement depuis la source (+z)}} \\
+\midrule
+PMMA & 88.5 & 98.5 & Face supérieure = bas de l'eau \\
+\rowcolor{green!10}
+\textbf{Interface PMMA/Eau} & \multicolumn{2}{c}{\textbf{z = 98.5}} & \textbf{Contact direct !} \\
+Eau & 98.5 & 103.5 & 5 anneaux concentriques \\
+PreContainerPlane & 98.5 & 99.5 & \textcolor{orange}{Dans l'eau (chevauche)} \\
+PostContainerPlane & 102.5 & 103.5 & \textcolor{violet}{Dans l'eau (chevauche)} \\
+Feuille W & 103.5 & 103.52 & Sur l'eau \\
+Couvercle container & 103.5 & 105.5 & W/PETG \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ═══════════════════════════════════════════════════════════════════════════════
+\section{Comparaison avec la configuration précédente}
+% ═══════════════════════════════════════════════════════════════════════════════
+
+\begin{table}[H]
+\centering
+\caption{Comparaison : ancienne configuration vs nouvelle (contact direct)}
+\label{tab:comparaison}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+\textbf{Paramètre} & \textbf{Ancienne config.} & \textbf{Nouvelle config.} \\
+\midrule
+Épaisseur PMMA & 5-40 mm & 10 mm \\
+Position $z_{\text{PMMA, haut}}$ & 96.5 mm & \textbf{98.5 mm} \\
+Position $z_{\text{eau, bas}}$ & 98.5 mm & 98.5 mm \\
+\midrule
+\textbf{Gap PMMA-eau} & \textbf{2.0 mm (air)} & \textbf{0 mm (contact)} \\
+\midrule
+PreContainerPlane & Avant l'eau (air) & \textbf{Dans l'eau} \\
+Position PreContainer & 97.0 - 98.0 mm & \textbf{98.5 - 99.5 mm} \\
+\midrule
+Matériau PreContainer & Air & \textbf{Eau} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ═══════════════════════════════════════════════════════════════════════════════
+\section{Justification physique}
+% ═══════════════════════════════════════════════════════════════════════════════
+
+\subsection{Pourquoi le contact direct ?}
+
+Dans la configuration précédente, les électrons secondaires créés dans le PMMA devaient traverser un gap d'air de 2 mm avant d'atteindre l'eau. Or, le parcours des électrons dans le PMMA est limité :
+
+\begin{table}[H]
+\centering
+\caption{Parcours des électrons dans le PMMA ($\rho \approx 1.18$ g/cm³)}
+\begin{tabular}{@{}cc@{}}
+\toprule
+\textbf{Énergie} & \textbf{Parcours dans PMMA} \\
+\midrule
+100 keV & $\sim$ 0.1 mm \\
+300 keV & $\sim$ 0.7 mm \\
+500 keV & $\sim$ 1.5 mm \\
+1000 keV & $\sim$ 4 mm \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Avec un PMMA de 10 mm en \textbf{contact direct} avec l'eau, les électrons créés dans les derniers millimètres du PMMA (côté eau) peuvent contribuer directement au dépôt de dose dans l'eau.
+
+\subsection{Plans de comptage dans l'eau}
+
+Les plans de comptage (PreContainer et PostContainer) sont maintenant positionnés \textbf{dans l'eau} avec chevauchement autorisé. Cela permet de :
+
+\begin{itemize}
+    \item Compter les particules à l'interface PMMA/eau (PreContainer à $z = 98.5-99.5$ mm)
+    \item Compter les particules juste avant la feuille de tungstène (PostContainer à $z = 102.5-103.5$ mm)
+    \item Ne pas perturber le transport des électrons par un volume d'air intermédiaire
+\end{itemize}
+
+% ═══════════════════════════════════════════════════════════════════════════════
+\section{Modification du code}
+% ═══════════════════════════════════════════════════════════════════════════════
+
+Les modifications principales dans \texttt{DetectorConstruction.cc} sont :
+
+\begin{verbatim}
+// PMMA en contact direct avec l'eau
+G4double pmmaTopZ = waterBottomZ;  // Contact direct ! (était waterBottomZ - gap)
+
+// PreContainerPlane dans l'eau (chevauchement)
+G4double preContainerPlane_z = waterBottomZ + fCountingPlaneThickness/2;
+// Matériau : eau (était air)
+G4LogicalVolume* logicPreContainerPlane = 
+    new G4LogicalVolume(solidPreContainerPlane, fWater, "PreContainerPlaneLog");
+
+// checkOverlaps = false pour autoriser le chevauchement
+new G4PVPlacement(..., false, 0, false);  // dernier paramètre = false
+\end{verbatim}
+
+\end{document}

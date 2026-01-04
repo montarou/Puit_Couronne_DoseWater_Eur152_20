@@ -2,13 +2,14 @@
 #include "G4SystemOfUnits.hh"
 #include <ctime>
 #include <iomanip>
+#include <sstream>
 
 // Initialisation du singleton
 Logger* Logger::fInstance = nullptr;
 
 Logger::Logger()
 : fEnabled(true),
-  fEchoToConsole(false),  // Par défaut, pas d'écho sur console
+  fEchoToConsole(false),
   fFilename("output.log")
 {}
 
@@ -35,18 +36,19 @@ void Logger::Open(const G4String& filename)
     fLogFile.open(filename, std::ios::out);
     
     if (fLogFile.is_open()) {
-        // Écrire l'en-tête du fichier
-        time_t now = time(nullptr);
-        char timeStr[100];
-        strftime(timeStr, sizeof(timeStr), "%Y-%m-%d %H:%M:%S", localtime(&now));
+        G4cout << "Logger: Output redirected to " << filename << G4endl;
+        
+        // Écrire un header avec la date/heure
+        std::time_t now = std::time(nullptr);
+        std::tm* ltm = std::localtime(&now);
         
         fLogFile << "╔═══════════════════════════════════════════════════════════════════╗\n";
         fLogFile << "║            PUITS COURONNE - DIAGNOSTIC LOG                        ║\n";
-        fLogFile << "║            " << timeStr << "                               ║\n";
-        fLogFile << "╚═══════════════════════════════════════════════════════════════════╝\n\n";
+        fLogFile << "║            " << std::put_time(ltm, "%Y-%m-%d %H:%M:%S") 
+                 << "                               ║\n";
+        fLogFile << "╚═══════════════════════════════════════════════════════════════════╝\n";
+        fLogFile << "\n";
         fLogFile.flush();
-        
-        G4cout << "Logger: Output redirected to " << filename << G4endl;
     } else {
         G4cerr << "Logger: ERROR - Could not open " << filename << G4endl;
     }
@@ -55,13 +57,14 @@ void Logger::Open(const G4String& filename)
 void Logger::Close()
 {
     if (fLogFile.is_open()) {
-        // Écrire le pied de page
-        time_t now = time(nullptr);
-        char timeStr[100];
-        strftime(timeStr, sizeof(timeStr), "%Y-%m-%d %H:%M:%S", localtime(&now));
+        // Écrire un footer
+        std::time_t now = std::time(nullptr);
+        std::tm* ltm = std::localtime(&now);
         
-        fLogFile << "\n╔═══════════════════════════════════════════════════════════════════╗\n";
-        fLogFile << "║            END OF LOG - " << timeStr << "                    ║\n";
+        fLogFile << "\n";
+        fLogFile << "╔═══════════════════════════════════════════════════════════════════╗\n";
+        fLogFile << "║            END OF LOG - " << std::put_time(ltm, "%Y-%m-%d %H:%M:%S") 
+                 << "                    ║\n";
         fLogFile << "╚═══════════════════════════════════════════════════════════════════╝\n";
         
         fLogFile.close();
@@ -101,16 +104,26 @@ void Logger::LogSeparator(char c, int length)
 {
     if (!fEnabled) return;
     
-    std::string sep(length, c);
-    LogLine(sep);
+    std::string separator(length, c);
+    LogLine(separator);
 }
 
 void Logger::LogHeader(const G4String& title)
 {
     if (!fEnabled) return;
     
-    LogLine("");
-    LogSeparator('=');
-    LogLine("  " + title);
-    LogSeparator('=');
+    std::ostringstream oss;
+    oss << "\n";
+    oss << "======================================================================\n";
+    oss << "  " << title << "\n";
+    oss << "======================================================================\n";
+    
+    if (fLogFile.is_open()) {
+        fLogFile << oss.str();
+        fLogFile.flush();
+    }
+    
+    if (fEchoToConsole) {
+        G4cout << oss.str();
+    }
 }

@@ -1,74 +1,100 @@
 //
 // ********************************************************************
-// * PUITS COURONNE - Simulation de dose dans un détecteur liquide   *
-// *                                                                  *
-// * Géométrie:                                                       *
-// * - Source Eu-152 à z = 2 cm                                       *
-// * - Filtre W/PETG (75%/25%) à z = 4 cm                             *
-// * - Container W/PETG "puits couronne" à z = 10 cm                  *
-// * - Anneaux d'eau concentriques pour mesure de dose                *
+// * Puits Couronne - Simulation de dose dans l'eau                   *
+// * Source Eu-152 + filtre W/PETG + container avec anneaux d'eau     *
 // ********************************************************************
 //
 
-#include "DetectorConstruction.hh"
-#include "ActionInitialization.hh"
-#include "PhysicsList.hh"
-
-#include "G4RunManagerFactory.hh"
+#include "G4RunManager.hh"
 #include "G4UImanager.hh"
 #include "G4VisExecutive.hh"
 #include "G4UIExecutive.hh"
+
+#include "DetectorConstruction.hh"
+#include "PhysicsList.hh"
+#include "ActionInitialization.hh"
+
 #include "Randomize.hh"
+#include <ctime>
 
 int main(int argc, char** argv)
 {
-    // Detect interactive mode (if no arguments) and define UI session
-    G4UIExecutive* ui = nullptr;
-    if (argc == 1) {
-        ui = new G4UIExecutive(argc, argv);
-    }
-
-    // Optionally: choose a different Random engine...
+    // ═══════════════════════════════════════════════════════════════
+    // INITIALISATION DU GÉNÉRATEUR ALÉATOIRE
+    // ═══════════════════════════════════════════════════════════════
+    
     G4Random::setTheEngine(new CLHEP::RanecuEngine);
     G4long seed = time(NULL);
     G4Random::setTheSeed(seed);
     
-    G4cout << "\n╔═══════════════════════════════════════════════════════════════╗" << G4endl;
-    G4cout << "║            PUITS COURONNE - Simulation Geant4                  ║" << G4endl;
-    G4cout << "║                                                                ║" << G4endl;
-    G4cout << "║  Dose measurement in water rings inside W/PETG container       ║" << G4endl;
-    G4cout << "║  Random seed: " << seed << G4endl;
-    G4cout << "╚═══════════════════════════════════════════════════════════════╝\n" << G4endl;
+    G4cout << "\n";
+    G4cout << "╔═══════════════════════════════════════════════════════════════╗\n";
+    G4cout << "║         PUITS COURONNE - Mode Séquentiel                      ║\n";
+    G4cout << "║         Dose dans l'eau - Source Eu-152                       ║\n";
+    G4cout << "╠═══════════════════════════════════════════════════════════════╣\n";
+    G4cout << "║  Seed aléatoire: " << seed << "                              ║\n";
+    G4cout << "╚═══════════════════════════════════════════════════════════════╝\n";
+    G4cout << G4endl;
 
-    // Construct the run manager
-    auto* runManager = G4RunManagerFactory::CreateRunManager(G4RunManagerType::Default);
+    // ═══════════════════════════════════════════════════════════════
+    // CRÉATION DU RUN MANAGER (MODE SÉQUENTIEL)
+    // ═══════════════════════════════════════════════════════════════
+    
+    auto* runManager = new G4RunManager;
 
-    // Set mandatory initialization classes
+    // ═══════════════════════════════════════════════════════════════
+    // INITIALISATION DES COMPOSANTS OBLIGATOIRES
+    // ═══════════════════════════════════════════════════════════════
+    
+    // Construction du détecteur
     runManager->SetUserInitialization(new DetectorConstruction());
+    
+    // Liste de physique
     runManager->SetUserInitialization(new PhysicsList());
+    
+    // Actions utilisateur
     runManager->SetUserInitialization(new ActionInitialization());
 
-    // Initialize visualization
+    // ═══════════════════════════════════════════════════════════════
+    // DÉTECTION DU MODE INTERACTIF OU BATCH
+    // ═══════════════════════════════════════════════════════════════
+    
+    G4UIExecutive* ui = nullptr;
+    if (argc == 1) {
+        // Mode interactif (pas d'arguments)
+        ui = new G4UIExecutive(argc, argv);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // INITIALISATION DE LA VISUALISATION
+    // ═══════════════════════════════════════════════════════════════
+    
     G4VisManager* visManager = new G4VisExecutive;
     visManager->Initialize();
 
-    // Get the pointer to the User Interface manager
+    // ═══════════════════════════════════════════════════════════════
+    // GESTIONNAIRE D'INTERFACE UTILISATEUR
+    // ═══════════════════════════════════════════════════════════════
+    
     G4UImanager* UImanager = G4UImanager::GetUIpointer();
 
-    // Process macro or start UI session
     if (!ui) {
-        // batch mode
+        // Mode batch - exécuter la macro passée en argument
         G4String command = "/control/execute ";
         G4String fileName = argv[1];
         UImanager->ApplyCommand(command + fileName);
-    } else {
-        // interactive mode
+    }
+    else {
+        // Mode interactif
         UImanager->ApplyCommand("/control/execute init_vis.mac");
         ui->SessionStart();
         delete ui;
     }
 
-    // Job termination
+    // ═══════════════════════════════════════════════════════════════
+    // NETTOYAGE
+    // ═══════════════════════════════════════════════════════════════
+    
     delete visManager;
     delete runManager;
 

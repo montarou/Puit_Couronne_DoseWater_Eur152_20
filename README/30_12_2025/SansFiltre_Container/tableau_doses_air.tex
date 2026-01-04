@@ -1,0 +1,80 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{colortbl}
+
+\sisetup{
+    scientific-notation = true,
+    round-mode = figures,
+    round-precision = 3,
+    exponent-product = \times
+}
+
+\begin{document}
+
+\begin{table}[htbp]
+    \centering
+    \caption{Doses déposées dans les anneaux d'eau -- Simulation avec filtre en \textbf{air} ($10^6$ désintégrations Eu-152)}
+    \label{tab:doses_air}
+    \begin{tabular}{c S[table-format=1.4] S[table-format=1.3e2] S[table-format=1.3e2] S[table-format=1.3e2] r}
+        \toprule
+        \textbf{Anneau} & {\textbf{Masse}} & {\textbf{$E_{dep}$}} & {\textbf{Dose}} & {\textbf{Dose/evt}} & \textbf{Événements} \\
+                        & {(g)}            & {(MeV)}              & {(nGy)}         & {(nGy)}             & \\
+        \midrule
+        0 (r=0--5 mm)   & 0.3927 & 4.407e2 & 1.798e2 & 6.762e-2 & 2\,659 \\
+        1 (r=5--10 mm)  & 1.1781 & 1.307e3 & 1.778e2 & 2.274e-2 & 7\,818 \\
+        2 (r=10--15 mm) & 1.9635 & 2.184e3 & 1.782e2 & 1.356e-2 & 13\,144 \\
+        3 (r=15--20 mm) & 2.7489 & 2.970e3 & 1.731e2 & 9.703e-3 & 17\,843 \\
+        4 (r=20--25 mm) & 3.5343 & 3.970e3 & 1.800e2 & 7.773e-3 & 23\,152 \\
+        \midrule
+        \textbf{TOTAL}  & \textbf{9.8175} & \textbf{1.087e4} & \textbf{1.774e2} & \textbf{1.774e-4} & \textbf{1\,000\,000} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+% Version simplifiée sans notation scientifique pour certaines colonnes
+\begin{table}[htbp]
+    \centering
+    \caption{Doses déposées dans les anneaux d'eau -- Version simplifiée}
+    \label{tab:doses_air_simple}
+    \begin{tabular}{ccccc}
+        \toprule
+        \textbf{Anneau} & \textbf{Rayon (mm)} & \textbf{Masse (g)} & \textbf{Dose (nGy)} & \textbf{Dose/désint. (nGy)} \\
+        \midrule
+        0 & 0 -- 5   & 0.393 & 179.8 & $6.76 \times 10^{-2}$ \\
+        1 & 5 -- 10  & 1.178 & 177.8 & $2.27 \times 10^{-2}$ \\
+        2 & 10 -- 15 & 1.964 & 178.2 & $1.36 \times 10^{-2}$ \\
+        3 & 15 -- 20 & 2.749 & 173.1 & $9.70 \times 10^{-3}$ \\
+        4 & 20 -- 25 & 3.534 & 180.0 & $7.77 \times 10^{-3}$ \\
+        \midrule
+        \multicolumn{2}{c}{\textbf{TOTAL}} & \textbf{9.817} & \textbf{177.4} & $\mathbf{1.77 \times 10^{-4}}$ \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+% Tableau comparatif avec/sans filtre W_PETG
+\begin{table}[htbp]
+    \centering
+    \caption{Comparaison des doses : filtre W/PETG vs filtre Air}
+    \label{tab:doses_comparaison}
+    \begin{tabular}{ccccc}
+        \toprule
+        \textbf{Anneau} & \textbf{Rayon (mm)} & \textbf{Dose W/PETG (nGy)} & \textbf{Dose Air (nGy)} & \textbf{Augmentation} \\
+        \midrule
+        0 & 0 -- 5   & 148.4 & 179.8 & +21.2\% \\
+        1 & 5 -- 10  & 159.7 & 177.8 & +11.3\% \\
+        2 & 10 -- 15 & 155.3 & 178.2 & +14.7\% \\
+        3 & 15 -- 20 & 149.2 & 173.1 & +16.0\% \\
+        4 & 20 -- 25 & 153.7 & 180.0 & +17.1\% \\
+        \midrule
+        \multicolumn{2}{c}{\textbf{TOTAL}} & \textbf{153.3} & \textbf{177.4} & \textbf{+15.7\%} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\end{document}

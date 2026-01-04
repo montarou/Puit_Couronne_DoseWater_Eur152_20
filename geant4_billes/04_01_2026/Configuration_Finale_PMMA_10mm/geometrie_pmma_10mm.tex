@@ -1,0 +1,324 @@
+\documentclass[11pt,a4paper]{article}
+
+% ═══════════════════════════════════════════════════════════════════════════════
+% PACKAGES
+% ═══════════════════════════════════════════════════════════════════════════════
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage{geometry}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{float}
+\usepackage{caption}
+
+\geometry{margin=2cm}
+\sisetup{locale=FR}
+
+\usetikzlibrary{patterns, arrows.meta, decorations.pathreplacing, calc, positioning}
+
+% ═══════════════════════════════════════════════════════════════════════════════
+% DOCUMENT
+% ═══════════════════════════════════════════════════════════════════════════════
+
+\begin{document}
+
+\title{\textbf{Géométrie du dispositif Puits Couronne}\\[0.3cm]
+\large Configuration avec PMMA 10 mm et feuille de tungstène}
+\author{Simulation Geant4}
+\date{\today}
+\maketitle
+
+% ═══════════════════════════════════════════════════════════════════════════════
+\section{Schéma de la géométrie}
+% ═══════════════════════════════════════════════════════════════════════════════
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.08, >=Stealth]
+
+    % ═══════════════════════════════════════════════════════════════════════════
+    % DÉFINITION DES COULEURS
+    % ═══════════════════════════════════════════════════════════════════════════
+    \definecolor{sourcecolor}{RGB}{255, 50, 50}
+    \definecolor{filtercolor}{RGB}{120, 120, 140}
+    \definecolor{containercolor}{RGB}{100, 100, 115}
+    \definecolor{pmmacolor}{RGB}{255, 180, 100}
+    \definecolor{watercolor}{RGB}{100, 150, 255}
+    \definecolor{tungstencolor}{RGB}{60, 60, 60}
+    \definecolor{precontainercolor}{RGB}{255, 140, 0}
+    \definecolor{postcontainercolor}{RGB}{150, 0, 150}
+
+    % ═══════════════════════════════════════════════════════════════════════════
+    % AXE Z (vertical)
+    % ═══════════════════════════════════════════════════════════════════════════
+    \draw[->, thick] (-45, 0) -- (-45, 115) node[above] {$z$ (mm)};
+    
+    % Graduations
+    \foreach \z in {0, 20, 40, 60, 80, 100} {
+        \draw (-46, \z) -- (-44, \z);
+        \node[left] at (-46, \z) {\footnotesize \z};
+    }
+
+    % ═══════════════════════════════════════════════════════════════════════════
+    % SOURCE Eu-152 (z = 20 mm)
+    % ═══════════════════════════════════════════════════════════════════════════
+    \fill[sourcecolor] (0, 20) circle (3);
+    \node[right] at (5, 20) {\footnotesize Source Eu-152};
+    
+    % Cône d'émission (20°)
+    \draw[sourcecolor, dashed, thick] (0, 20) -- (-18, 70);
+    \draw[sourcecolor, dashed, thick] (0, 20) -- (18, 70);
+    \node[sourcecolor, right] at (12, 45) {\footnotesize $\theta = 20°$};
+
+    % ═══════════════════════════════════════════════════════════════════════════
+    % FILTRE W/PETG (z = 37.5 - 42.5 mm)
+    % ═══════════════════════════════════════════════════════════════════════════
+    \fill[filtercolor, opacity=0.8] (-25, 37.5) rectangle (25, 42.5);
+    \draw[black, thick] (-25, 37.5) rectangle (25, 42.5);
+    \node[right] at (28, 40) {\footnotesize Filtre W/PETG (5 mm)};
+    
+    % Cotation filtre
+    \draw[<->, thin] (-30, 37.5) -- (-30, 42.5);
+    \node[left] at (-30, 40) {\tiny 5};
+
+    % ═══════════════════════════════════════════════════════════════════════════
+    % PMMA (z = 86.5 - 96.5 mm) - MODIFIÉ : 10 mm
+    % ═══════════════════════════════════════════════════════════════════════════
+    \fill[pmmacolor, opacity=0.7] (-25, 86.5) rectangle (25, 96.5);
+    \draw[black, thick] (-25, 86.5) rectangle (25, 96.5);
+    \node[right] at (28, 91.5) {\footnotesize \textbf{PMMA (10 mm)}};
+    
+    % Cotation PMMA
+    \draw[<->, thin] (-30, 86.5) -- (-30, 96.5);
+    \node[left] at (-30, 91.5) {\tiny 10};
+
+    % ═══════════════════════════════════════════════════════════════════════════
+    % PreContainerPlane (z = 97 - 98 mm)
+    % ═══════════════════════════════════════════════════════════════════════════
+    \fill[precontainercolor, opacity=0.4] (-25, 97) rectangle (25, 98);
+    \draw[precontainercolor, thick] (-25, 97) rectangle (25, 98);
+
+    % ═══════════════════════════════════════════════════════════════════════════
+    % EAU - 5 anneaux (z = 98.5 - 103.5 mm)
+    % ═══════════════════════════════════════════════════════════════════════════
+    % Anneau 0 (r = 0-5 mm)
+    \fill[watercolor!90, opacity=0.8] (-5, 98.5) rectangle (5, 103.5);
+    % Anneau 1 (r = 5-10 mm)
+    \fill[watercolor!80, opacity=0.8] (-10, 98.5) rectangle (-5, 103.5);
+    \fill[watercolor!80, opacity=0.8] (5, 98.5) rectangle (10, 103.5);
+    % Anneau 2 (r = 10-15 mm)
+    \fill[watercolor!70, opacity=0.8] (-15, 98.5) rectangle (-10, 103.5);
+    \fill[watercolor!70, opacity=0.8] (10, 98.5) rectangle (15, 103.5);
+    % Anneau 3 (r = 15-20 mm)
+    \fill[watercolor!60, opacity=0.8] (-20, 98.5) rectangle (-15, 103.5);
+    \fill[watercolor!60, opacity=0.8] (15, 98.5) rectangle (20, 103.5);
+    % Anneau 4 (r = 20-25 mm)
+    \fill[watercolor!50, opacity=0.8] (-25, 98.5) rectangle (-20, 103.5);
+    \fill[watercolor!50, opacity=0.8] (20, 98.5) rectangle (25, 103.5);
+    
+    \draw[black, thick] (-25, 98.5) rectangle (25, 103.5);
+    \node[right] at (28, 101) {\footnotesize Eau (5 mm, 5 anneaux)};
+    
+    % Cotation eau
+    \draw[<->, thin] (-30, 98.5) -- (-30, 103.5);
+    \node[left] at (-30, 101) {\tiny 5};
+
+    % ═══════════════════════════════════════════════════════════════════════════
+    % FEUILLE DE TUNGSTÈNE (z = 103.5 - 103.52 mm, 20 µm)
+    % ═══════════════════════════════════════════════════════════════════════════
+    \fill[tungstencolor] (-25, 103.5) rectangle (25, 104.5);  % Exagéré pour visibilité
+    \draw[black] (-25, 103.5) rectangle (25, 104.5);
+    \node[right] at (28, 104) {\footnotesize Feuille W (20 µm)};
+
+    % ═══════════════════════════════════════════════════════════════════════════
+    % PostContainerPlane (z = 102 - 103 mm, dans l'eau)
+    % ═══════════════════════════════════════════════════════════════════════════
+    \fill[postcontainercolor, opacity=0.4] (-25, 102) rectangle (25, 103);
+    \draw[postcontainercolor, thick, dashed] (-25, 102) rectangle (25, 103);
+
+    % ═══════════════════════════════════════════════════════════════════════════
+    % CONTAINER W/PETG (parois latérales et couvercle)
+    % ═══════════════════════════════════════════════════════════════════════════
+    % Paroi gauche
+    \fill[containercolor, opacity=0.8] (-27, 96.5) rectangle (-25, 103.5);
+    % Paroi droite
+    \fill[containercolor, opacity=0.8] (25, 96.5) rectangle (27, 103.5);
+    % Couvercle
+    \fill[containercolor, opacity=0.8] (-27, 103.5) rectangle (27, 105.5);
+    
+    \draw[black, thick] (-27, 96.5) -- (-27, 105.5) -- (27, 105.5) -- (27, 96.5);
+    \draw[black, thick] (-25, 96.5) -- (-25, 103.5);
+    \draw[black, thick] (25, 96.5) -- (25, 103.5);
+
+    % ═══════════════════════════════════════════════════════════════════════════
+    % LÉGENDE
+    % ═══════════════════════════════════════════════════════════════════════════
+    \node[anchor=north west] at (-45, -5) {
+        \begin{tabular}{cl}
+            \tikz\fill[sourcecolor] (0,0) circle (0.15); & Source Eu-152 \\
+            \tikz\fill[filtercolor] (0,0) rectangle (0.4,0.2); & Filtre W/PETG \\
+            \tikz\fill[pmmacolor] (0,0) rectangle (0.4,0.2); & PMMA \\
+            \tikz\fill[watercolor] (0,0) rectangle (0.4,0.2); & Eau \\
+            \tikz\fill[tungstencolor] (0,0) rectangle (0.4,0.2); & Feuille W \\
+            \tikz\fill[containercolor] (0,0) rectangle (0.4,0.2); & Container W/PETG \\
+        \end{tabular}
+    };
+
+    % ═══════════════════════════════════════════════════════════════════════════
+    % ANNOTATIONS DES POSITIONS Z
+    % ═══════════════════════════════════════════════════════════════════════════
+    
+    % Accolade pour le PMMA
+    \draw[decorate, decoration={brace, amplitude=5pt, mirror}, thick] 
+        (32, 86.5) -- (32, 96.5) node[midway, right=5pt] {\footnotesize 10 mm};
+    
+    % Flèche direction source
+    \draw[->, thick, red] (0, 15) -- (0, 5);
+    \node[red, below] at (0, 5) {\footnotesize vers source};
+    
+    % Flèche direction +z
+    \draw[->, thick, blue] (0, 108) -- (0, 115);
+    \node[blue, above] at (0, 115) {\footnotesize +z};
+
+\end{tikzpicture}
+\caption{Coupe schématique du dispositif Puits Couronne avec PMMA de 10 mm. L'épaisseur de la feuille de tungstène (20 µm) est exagérée pour la visualisation. La direction +z va de la source vers le détecteur.}
+\label{fig:geometrie}
+\end{figure}
+
+% ═══════════════════════════════════════════════════════════════════════════════
+\section{Tableau des positions}
+% ═══════════════════════════════════════════════════════════════════════════════
+
+\begin{table}[H]
+\centering
+\caption{Positions axiales (z) des éléments du dispositif avec PMMA de 10 mm}
+\label{tab:positions}
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+\textbf{Élément} & \textbf{$z_{\min}$} & \textbf{$z_{\text{centre}}$} & \textbf{$z_{\max}$} & \textbf{Épaisseur} & \textbf{Matériau} \\
+ & (mm) & (mm) & (mm) & (mm) & \\
+\midrule
+Source Eu-152 & -- & 20.0 & -- & ponctuelle & -- \\
+\midrule
+Filtre W/PETG & 37.5 & 40.0 & 42.5 & 5.0 & W/PETG 75\%/25\% \\
+\midrule
+\textbf{PMMA} & \textbf{86.5} & \textbf{91.5} & \textbf{96.5} & \textbf{10.0} & PMMA \\
+\midrule
+PreContainerPlane & 97.0 & 97.5 & 98.0 & 1.0 & Air \\
+\midrule
+Eau (anneaux) & 98.5 & 101.0 & 103.5 & 5.0 & H$_2$O \\
+\midrule
+PostContainerPlane & 102.0 & 102.5 & 103.0 & 1.0 & H$_2$O \\
+\midrule
+Feuille tungstène & 103.5 & 103.51 & 103.52 & 0.02 & W pur \\
+\midrule
+Container (couvercle) & 103.5 & 104.5 & 105.5 & 2.0 & W/PETG \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ═══════════════════════════════════════════════════════════════════════════════
+\section{Calcul des positions avec PMMA de 10 mm}
+% ═══════════════════════════════════════════════════════════════════════════════
+
+\subsection{Paramètres de base}
+
+\begin{table}[H]
+\centering
+\caption{Paramètres géométriques du dispositif}
+\label{tab:parametres}
+\begin{tabular}{@{}lrl@{}}
+\toprule
+\textbf{Paramètre} & \textbf{Valeur} & \textbf{Unité} \\
+\midrule
+Position centre container ($z_{\text{container}}$) & 100.0 & mm \\
+Hauteur intérieure container & 7.0 & mm \\
+Épaisseur parois container & 2.0 & mm \\
+\midrule
+Épaisseur eau & 5.0 & mm \\
+Épaisseur PMMA & \textbf{10.0} & mm \\
+Épaisseur feuille W & 20 & µm \\
+Épaisseur plans de comptage & 1.0 & mm \\
+\midrule
+Rayon intérieur container & 25.0 & mm \\
+Rayon PMMA & 25.0 & mm \\
+Rayon feuille W & 25.0 & mm \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Séquence de calcul des positions z}
+
+Les positions sont calculées de haut en bas dans le container :
+
+\begin{align}
+z_{\text{eau, haut}} &= z_{\text{container}} + \frac{h_{\text{container}}}{2} = 100 + 3.5 = 103.5~\text{mm} \\
+z_{\text{eau, centre}} &= z_{\text{eau, haut}} - \frac{e_{\text{eau}}}{2} = 103.5 - 2.5 = 101.0~\text{mm} \\
+z_{\text{eau, bas}} &= z_{\text{eau, haut}} - e_{\text{eau}} = 103.5 - 5 = 98.5~\text{mm}
+\end{align}
+
+Position du PreContainerPlane (GAP = 0 avec l'eau) :
+\begin{equation}
+z_{\text{PreContainer}} = z_{\text{eau, bas}} - \frac{e_{\text{plan}}}{2} = 98.5 - 0.5 = 98.0~\text{mm (haut)}
+\end{equation}
+
+Position du PMMA (juste avant PreContainerPlane) :
+\begin{align}
+z_{\text{PMMA, haut}} &= z_{\text{eau, bas}} - e_{\text{plan}} = 98.5 - 1.0 = 97.5~\text{mm} \\
+z_{\text{PMMA, haut}} &\approx 96.5~\text{mm (ajusté)} \\
+z_{\text{PMMA, centre}} &= z_{\text{PMMA, haut}} - \frac{e_{\text{PMMA}}}{2} = 96.5 - 5.0 = 91.5~\text{mm} \\
+z_{\text{PMMA, bas}} &= z_{\text{PMMA, haut}} - e_{\text{PMMA}} = 96.5 - 10.0 = \boxed{86.5~\text{mm}}
+\end{align}
+
+Position de la feuille de tungstène (juste après l'eau) :
+\begin{align}
+z_{\text{W, bas}} &= z_{\text{eau, haut}} = 103.5~\text{mm} \\
+z_{\text{W, haut}} &= z_{\text{W, bas}} + e_{\text{W}} = 103.5 + 0.02 = 103.52~\text{mm}
+\end{align}
+
+% ═══════════════════════════════════════════════════════════════════════════════
+\section{Comparaison avec la configuration précédente}
+% ═══════════════════════════════════════════════════════════════════════════════
+
+\begin{table}[H]
+\centering
+\caption{Comparaison des configurations PMMA 5 mm vs 10 mm}
+\label{tab:comparaison}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Paramètre} & \textbf{PMMA 5 mm} & \textbf{PMMA 10 mm} & \textbf{Différence} \\
+\midrule
+Épaisseur PMMA & 5.0 mm & 10.0 mm & +5.0 mm \\
+$z_{\text{PMMA, bas}}$ & 91.5 mm & 86.5 mm & -5.0 mm \\
+$z_{\text{PMMA, haut}}$ & 96.5 mm & 96.5 mm & 0 mm \\
+$z_{\text{PMMA, centre}}$ & 94.0 mm & 91.5 mm & -2.5 mm \\
+\midrule
+Distance source-PMMA & 71.5 mm & 66.5 mm & -5.0 mm \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Note :} L'augmentation de l'épaisseur du PMMA se fait vers la source (côté $-z$). La face supérieure du PMMA reste à la même position ($z = 96.5$ mm), tandis que la face inférieure descend de 91.5 mm à 86.5 mm.
+
+% ═══════════════════════════════════════════════════════════════════════════════
+\section{Empilement des éléments (direction +z)}
+% ═══════════════════════════════════════════════════════════════════════════════
+
+L'ordre des éléments depuis la source vers le détecteur est :
+
+\begin{enumerate}
+    \item \textbf{Source Eu-152} : $z = 20$ mm
+    \item \textbf{Filtre W/PETG} : $z = 37.5 - 42.5$ mm (5 mm)
+    \item \textbf{Air} : $z = 42.5 - 86.5$ mm (44 mm)
+    \item \textbf{PMMA} : $z = 86.5 - 96.5$ mm (\textbf{10 mm})
+    \item \textbf{PreContainerPlane} : $z = 97 - 98$ mm (1 mm, air)
+    \item \textbf{Eau} : $z = 98.5 - 103.5$ mm (5 mm, 5 anneaux)
+    \item \textbf{Feuille W} : $z = 103.5 - 103.52$ mm (20 µm)
+    \item \textbf{Couvercle container} : $z = 103.5 - 105.5$ mm (2 mm)
+\end{enumerate}
+
+\end{document}

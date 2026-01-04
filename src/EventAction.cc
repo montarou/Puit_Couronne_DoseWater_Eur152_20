@@ -1,240 +1,293 @@
 #include "EventAction.hh"
 #include "RunAction.hh"
-#include "DetectorConstruction.hh"
 #include "Logger.hh"
 
 #include "G4Event.hh"
-#include "G4PrimaryVertex.hh"
-#include "G4PrimaryParticle.hh"
 #include "G4SystemOfUnits.hh"
-#include "G4AnalysisManager.hh"
-#include <cmath>
 #include <sstream>
+#include <cmath>
+
+// ═══════════════════════════════════════════════════════════════
+// DÉFINITION DES RAIES GAMMA Eu-152 (énergies en keV)
+// ═══════════════════════════════════════════════════════════════
+const std::array<G4double, EventAction::kNbGammaLines> EventAction::kGammaLineEnergies = {
+    121.78,   // 0: 29.16%
+    244.70,   // 1: 7.58%
+    344.28,   // 2: 26.59%
+    411.12,   // 3: 2.24%
+    443.97,   // 4: 2.83%
+    778.90,   // 5: 12.97%
+    867.38,   // 6: 4.24%
+    964.08,   // 7: 14.63%
+    1085.87,  // 8: 10.21%
+    1112.07,  // 9: 13.64%
+    1408.01   // 10: 21.01%
+};
+
+const std::array<G4String, EventAction::kNbGammaLines> EventAction::kGammaLineNames = {
+    "122 keV",
+    "245 keV",
+    "344 keV",
+    "411 keV",
+    "444 keV",
+    "779 keV",
+    "867 keV",
+    "964 keV",
+    "1086 keV",
+    "1112 keV",
+    "1408 keV"
+};
 
 EventAction::EventAction(RunAction* runAction)
 : G4UserEventAction(),
   fRunAction(runAction),
-  fTransmissionTolerance(1.0 * keV),
+  fPreContainerNPhotons(0),
+  fPreContainerSumEPhotons(0.),
+  fPreContainerNElectrons(0),
+  fPreContainerSumEElectrons(0.),
+  fPostContainerNPhotonsBack(0),
+  fPostContainerSumEPhotonsBack(0.),
+  fPostContainerNElectronsBack(0),
+  fPostContainerSumEElectronsBack(0.),
+  fPostContainerNPhotonsFwd(0),
+  fPostContainerSumEPhotonsFwd(0.),
+  fPostContainerNElectronsFwd(0),
+  fPostContainerSumEElectronsFwd(0.),
+  fTransmissionTolerance(0.01),  // 1% de tolérance pour transmission
   fVerboseLevel(1)
 {
-    // Initialiser les dépôts d'énergie par anneau à zéro
-    for (G4int i = 0; i < DetectorConstruction::kNbWaterRings; ++i) {
-        fRingEnergyDeposit[i] = 0.;
+    // Initialisation des tableaux de dépôt d'énergie
+    fRingEnergyDeposit.fill(0.);
+    for (auto& arr : fRingEnergyByLine) {
+        arr.fill(0.);
     }
 }
 
 EventAction::~EventAction()
 {}
 
+// ═══════════════════════════════════════════════════════════════
+// IDENTIFICATION DES RAIES GAMMA
+// ═══════════════════════════════════════════════════════════════
+
+G4int EventAction::GetGammaLineIndex(G4double energy)
+{
+    // Tolérance de 0.5 keV pour l'identification
+    const G4double tolerance = 0.5 * keV;
+    
+    for (G4int i = 0; i < kNbGammaLines; ++i) {
+        if (std::abs(energy - kGammaLineEnergies[i] * keV) < tolerance) {
+            return i;
+        }
+    }
+    return -1;  // Raie non identifiée
+}
+
+G4double EventAction::GetGammaLineEnergy(G4int lineIndex)
+{
+    if (lineIndex >= 0 && lineIndex < kNbGammaLines) {
+        return kGammaLineEnergies[lineIndex];
+    }
+    return 0.;
+}
+
+G4String EventAction::GetGammaLineName(G4int lineIndex)
+{
+    if (lineIndex >= 0 && lineIndex < kNbGammaLines) {
+        return kGammaLineNames[lineIndex];
+    }
+    return "Unknown";
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DÉBUT ET FIN D'ÉVÉNEMENT
+// ═══════════════════════════════════════════════════════════════
+
 void EventAction::BeginOfEventAction(const G4Event* event)
 {
-    // ═══════════════════════════════════════════════════════════════
-    // RESET DE TOUTES LES STRUCTURES AU DÉBUT DE CHAQUE ÉVÉNEMENT
-    // ═══════════════════════════════════════════════════════════════
+    // Réinitialiser les structures pour le nouvel événement
     fPrimaryGammas.clear();
     fSecondariesDownstream.clear();
     fTrackIDtoIndex.clear();
     
-    // Reset des dépôts d'énergie par anneau
-    for (G4int i = 0; i < DetectorConstruction::kNbWaterRings; ++i) {
-        fRingEnergyDeposit[i] = 0.;
+    // Réinitialiser les dépôts d'énergie
+    fRingEnergyDeposit.fill(0.);
+    for (auto& arr : fRingEnergyByLine) {
+        arr.fill(0.);
     }
-
-    // ═══════════════════════════════════════════════════════════════
-    // RÉCUPÉRATION DES INFORMATIONS DES GAMMAS PRIMAIRES
-    // ═══════════════════════════════════════════════════════════════
+    
+    // Réinitialiser les comptages aux plans container
+    fPreContainerNPhotons = 0;
+    fPreContainerSumEPhotons = 0.;
+    fPreContainerNElectrons = 0;
+    fPreContainerSumEElectrons = 0.;
+    
+    fPostContainerNPhotonsBack = 0;
+    fPostContainerSumEPhotonsBack = 0.;
+    fPostContainerNElectronsBack = 0;
+    fPostContainerSumEElectronsBack = 0.;
+    
+    fPostContainerNPhotonsFwd = 0;
+    fPostContainerSumEPhotonsFwd = 0.;
+    fPostContainerNElectronsFwd = 0;
+    fPostContainerSumEElectronsFwd = 0.;
+    
+    // Enregistrer les primaires depuis l'événement G4
     G4int nVertices = event->GetNumberOfPrimaryVertex();
-    G4int eventID = event->GetEventID();
-    G4int expectedTrackID = 1;
-
-    for (G4int iVertex = 0; iVertex < nVertices; ++iVertex) {
-        G4PrimaryVertex* vertex = event->GetPrimaryVertex(iVertex);
-        if (!vertex) continue;
-
-        G4PrimaryParticle* primary = vertex->GetPrimary();
-
-        while (primary) {
-            G4double energy = primary->GetKineticEnergy();
-            G4ThreeVector momentum = primary->GetMomentumDirection();
-
-            G4double theta = std::acos(momentum.z());
-            G4double phi = std::atan2(momentum.y(), momentum.x());
-
-            PrimaryGammaInfo info;
-            info.trackID = expectedTrackID;
-            info.energyInitial = energy;
-            info.energyUpstream = 0.;
-            info.energyDownstream = 0.;
-            info.theta = theta;
-            info.phi = phi;
-            info.detectedUpstream = false;
-            info.detectedDownstream = false;
-            info.transmitted = false;
-
-            fTrackIDtoIndex[expectedTrackID] = fPrimaryGammas.size();
-            fPrimaryGammas.push_back(info);
-
-            if (fVerboseLevel >= 2 && eventID < 5) {
-                std::stringstream ss;
-                ss << "BeginOfEvent | Registered primary gamma: "
-                   << "trackID=" << expectedTrackID
-                   << ", E=" << energy/keV << " keV";
-                Logger::GetInstance()->LogLine(ss.str());
+    
+    for (G4int iv = 0; iv < nVertices; ++iv) {
+        G4PrimaryVertex* vertex = event->GetPrimaryVertex(iv);
+        G4int nParticles = vertex->GetNumberOfParticle();
+        
+        for (G4int ip = 0; ip < nParticles; ++ip) {
+            G4PrimaryParticle* primary = vertex->GetPrimary(ip);
+            
+            if (primary->GetPDGcode() == 22) {  // gamma
+                PrimaryGammaInfo info;
+                info.trackID = fPrimaryGammas.size() + 1;  // TrackID commence à 1
+                info.energyInitial = primary->GetKineticEnergy();
+                info.gammaLineIndex = GetGammaLineIndex(info.energyInitial);
+                info.energyUpstream = 0.;
+                info.energyDownstream = 0.;
+                
+                // Calculer theta et phi
+                G4ThreeVector mom = primary->GetMomentumDirection();
+                info.theta = std::acos(mom.z());
+                info.phi = std::atan2(mom.y(), mom.x());
+                
+                info.detectedUpstream = false;
+                info.detectedDownstream = false;
+                info.transmitted = false;
+                info.absorbedInFilter = false;
+                info.absorbedInWater = false;
+                info.exitedFilter = false;
+                info.enteredWater = false;
+                
+                fTrackIDtoIndex[info.trackID] = fPrimaryGammas.size();
+                fPrimaryGammas.push_back(info);
             }
-
-            expectedTrackID++;
-            primary = primary->GetNext();
         }
-    }
-
-    if (fVerboseLevel >= 1 && (eventID < 10 || eventID % 10000 == 0)) {
-        std::stringstream ss;
-        ss << "BeginOfEvent " << eventID
-           << " | " << fPrimaryGammas.size() << " primary gamma(s) registered";
-        Logger::GetInstance()->LogLine(ss.str());
     }
 }
 
 void EventAction::EndOfEventAction(const G4Event* event)
 {
     G4int eventID = event->GetEventID();
-    G4int nPrimaries = fPrimaryGammas.size();
-
-    std::vector<G4double> primaryEnergies;
-    G4double totalEnergy = 0.;
-    G4int nTransmitted = 0;
-    G4int nAbsorbed = 0;
-    G4int nScattered = 0;
-
-    auto analysisManager = G4AnalysisManager::Instance();
-
-    for (size_t i = 0; i < fPrimaryGammas.size(); ++i) {
-        const auto& g = fPrimaryGammas[i];
-
-        primaryEnergies.push_back(g.energyInitial);
-        totalEnergy += g.energyInitial;
-
-        if (g.transmitted) {
-            nTransmitted++;
-        } else if (g.detectedUpstream && g.detectedDownstream) {
-            nScattered++;
-        } else if (g.detectedUpstream && !g.detectedDownstream) {
-            nAbsorbed++;
+    
+    // Déterminer le statut de transmission pour chaque primaire
+    for (auto& gamma : fPrimaryGammas) {
+        if (gamma.detectedUpstream && gamma.detectedDownstream) {
+            G4double ratio = gamma.energyDownstream / gamma.energyUpstream;
+            gamma.transmitted = (ratio > (1.0 - fTransmissionTolerance));
         }
-
-        // Remplir le ntuple GammaData
-        analysisManager->FillNtupleIColumn(1, 0, eventID);
-        analysisManager->FillNtupleIColumn(1, 1, i);
-        analysisManager->FillNtupleDColumn(1, 2, g.energyInitial/keV);
-        analysisManager->FillNtupleDColumn(1, 3, g.energyUpstream/keV);
-        analysisManager->FillNtupleDColumn(1, 4, g.energyDownstream/keV);
-        analysisManager->FillNtupleDColumn(1, 5, g.theta/deg);
-        analysisManager->FillNtupleDColumn(1, 6, g.phi/deg);
-        analysisManager->FillNtupleIColumn(1, 7, g.detectedUpstream ? 1 : 0);
-        analysisManager->FillNtupleIColumn(1, 8, g.detectedDownstream ? 1 : 0);
-        analysisManager->FillNtupleIColumn(1, 9, g.transmitted ? 1 : 0);
-        analysisManager->AddNtupleRow(1);
-    }
-
-    // Calculer la dose totale dans l'eau
-    G4double totalWaterDeposit = GetTotalWaterEnergy();
-
-    // ═══════════════════════════════════════════════════════════════
-    // REMPLIR LE NTUPLE DOSE PAR ANNEAU (Ntuple 2)
-    // ═══════════════════════════════════════════════════════════════
-    analysisManager->FillNtupleIColumn(2, 0, eventID);
-    analysisManager->FillNtupleIColumn(2, 1, nPrimaries);
-    for (G4int i = 0; i < DetectorConstruction::kNbWaterRings; ++i) {
-        analysisManager->FillNtupleDColumn(2, 2 + i, fRingEnergyDeposit[i]/keV);
-    }
-    analysisManager->FillNtupleDColumn(2, 2 + DetectorConstruction::kNbWaterRings, totalWaterDeposit/keV);
-    analysisManager->AddNtupleRow(2);
-
-    // Remplir le ntuple EventData
-    analysisManager->FillNtupleIColumn(0, 0, eventID);
-    analysisManager->FillNtupleIColumn(0, 1, nPrimaries);
-    analysisManager->FillNtupleDColumn(0, 2, totalEnergy/keV);
-    analysisManager->FillNtupleIColumn(0, 3, nTransmitted);
-    analysisManager->FillNtupleIColumn(0, 4, nAbsorbed);
-    analysisManager->FillNtupleIColumn(0, 5, nScattered);
-    analysisManager->FillNtupleIColumn(0, 6, (G4int)fSecondariesDownstream.size());
-    analysisManager->FillNtupleDColumn(0, 7, totalWaterDeposit/keV);
-    analysisManager->AddNtupleRow(0);
-
-    // ═══════════════════════════════════════════════════════════════
-    // ENVOYER LES STATISTIQUES À RunAction
-    // ═══════════════════════════════════════════════════════════════
-    if (fRunAction) {
-        fRunAction->RecordEventStatistics(nPrimaries, primaryEnergies,
-                                          nTransmitted, nAbsorbed,
-                                          totalWaterDeposit);
         
-        // Envoyer la dose par anneau
-        for (G4int i = 0; i < DetectorConstruction::kNbWaterRings; ++i) {
-            if (fRingEnergyDeposit[i] > 0.) {
-                fRunAction->AddRingEnergy(i, fRingEnergyDeposit[i]);
+        // Si le gamma n'a pas atteint downstream et n'a pas été marqué comme absorbé,
+        // déterminer où il a été absorbé
+        if (!gamma.detectedDownstream) {
+            if (gamma.exitedFilter && !gamma.enteredWater) {
+                // Absorbé entre filtre et eau (dans l'air ou container)
+            } else if (!gamma.exitedFilter) {
+                gamma.absorbedInFilter = true;
+            } else if (gamma.enteredWater) {
+                gamma.absorbedInWater = true;
             }
         }
     }
-
-    // ═══════════════════════════════════════════════════════════════
-    // AFFICHAGE DE DIAGNOSTIC -> FICHIER LOG
-    // ═══════════════════════════════════════════════════════════════
-    if (fVerboseLevel >= 1 && (eventID < 10 || eventID % 10000 == 0)) {
-        Logger* log = Logger::GetInstance();
-        if (log->IsOpen()) {
-            std::stringstream ss;
+    
+    // Collecter les statistiques pour chaque raie
+    std::vector<G4double> primaryEnergies;
+    for (const auto& gamma : fPrimaryGammas) {
+        primaryEnergies.push_back(gamma.energyInitial);
+        
+        // Enregistrer les statistiques par raie
+        if (gamma.gammaLineIndex >= 0) {
+            fRunAction->RecordGammaLineStatistics(
+                gamma.gammaLineIndex,
+                gamma.exitedFilter,
+                gamma.absorbedInFilter,
+                gamma.enteredWater,
+                gamma.absorbedInWater
+            );
+        }
+    }
+    
+    // Transférer les dépôts d'énergie vers RunAction
+    G4double totalDeposit = 0.;
+    for (G4int i = 0; i < DetectorConstruction::kNbWaterRings; ++i) {
+        if (fRingEnergyDeposit[i] > 0.) {
+            fRunAction->AddRingEnergy(i, fRingEnergyDeposit[i]);
+            totalDeposit += fRingEnergyDeposit[i];
             
-            log->LogSeparator('=', 50);
-            ss << "EVENT " << eventID << " SUMMARY";
-            log->LogLine(ss.str());
-            log->LogSeparator('=', 50);
-            
-            ss.str(""); ss << "Primary gammas: " << nPrimaries << " | Total E: " << totalEnergy/keV << " keV";
-            log->LogLine(ss.str());
-
-            for (size_t i = 0; i < fPrimaryGammas.size(); ++i) {
-                const auto& g = fPrimaryGammas[i];
-                G4String status = "UNKNOWN";
-                if (g.transmitted) status = "TRANSMITTED";
-                else if (g.detectedUpstream && g.detectedDownstream) status = "SCATTERED";
-                else if (g.detectedUpstream && !g.detectedDownstream) status = "ABSORBED";
-                else if (!g.detectedUpstream) status = "MISSED_UPSTREAM";
-
-                ss.str(""); 
-                ss << "  [" << i << "] trackID=" << g.trackID
-                   << " E_init=" << g.energyInitial/keV << " keV"
-                   << " -> [" << status << "]";
-                log->LogLine(ss.str());
-            }
-
-            // Afficher la dose par anneau
-            log->LogLine("Dose dans les anneaux d'eau:");
-            for (G4int i = 0; i < DetectorConstruction::kNbWaterRings; ++i) {
-                if (fRingEnergyDeposit[i] > 0.) {
-                    ss.str("");
-                    ss << "  Ring " << i << " (r=" 
-                       << DetectorConstruction::GetRingInnerRadius(i)/mm << "-"
-                       << DetectorConstruction::GetRingOuterRadius(i)/mm << " mm): "
-                       << fRingEnergyDeposit[i]/keV << " keV";
-                    log->LogLine(ss.str());
+            // Transférer aussi les dépôts par raie
+            for (G4int j = 0; j < kNbGammaLines; ++j) {
+                if (fRingEnergyByLine[i][j] > 0.) {
+                    fRunAction->AddRingEnergyByLine(i, j, fRingEnergyByLine[i][j]);
                 }
             }
-            ss.str(""); ss << "  TOTAL: " << totalWaterDeposit/keV << " keV";
-            log->LogLine(ss.str());
-            log->LogSeparator('=', 50);
-            log->LogLine("");
         }
     }
+    
+    // Enregistrer les statistiques globales de l'événement
+    fRunAction->RecordEventStatistics(
+        fPrimaryGammas.size(),
+        primaryEnergies,
+        GetNumberTransmitted(),
+        GetNumberAbsorbed(),
+        totalDeposit,
+        fRingEnergyDeposit
+    );
+    
+    // Enregistrer les comptages aux plans container
+    fRunAction->RecordContainerPlaneStatistics(
+        fPreContainerNPhotons, fPreContainerSumEPhotons,
+        fPreContainerNElectrons, fPreContainerSumEElectrons,
+        fPostContainerNPhotonsBack, fPostContainerSumEPhotonsBack,
+        fPostContainerNElectronsBack, fPostContainerSumEElectronsBack,
+        fPostContainerNPhotonsFwd, fPostContainerSumEPhotonsFwd,
+        fPostContainerNElectronsFwd, fPostContainerSumEElectronsFwd
+    );
+    
+    // Debug pour les premiers événements
+    if (fVerboseLevel > 0 && eventID < 10) {
+        std::stringstream ss;
+        ss << "EVENT " << eventID << " SUMMARY:";
+        ss << " Primaries=" << fPrimaryGammas.size();
+        ss << " Transmitted=" << GetNumberTransmitted();
+        ss << " Absorbed=" << GetNumberAbsorbed();
+        ss << " TotalDeposit=" << totalDeposit/keV << " keV";
+        Logger::GetInstance()->LogLine(ss.str());
+        
+        // Résumé des plans container
+        std::stringstream cs;
+        cs << "  PreContainer: nPhotons=" << fPreContainerNPhotons 
+           << " sumE=" << fPreContainerSumEPhotons/keV << " keV"
+           << " | nElec=" << fPreContainerNElectrons 
+           << " sumE=" << fPreContainerSumEElectrons/keV << " keV";
+        Logger::GetInstance()->LogLine(cs.str());
+        
+        std::stringstream ps;
+        ps << "  PostContainer: nPhotons_back=" << fPostContainerNPhotonsBack 
+           << " sumE_back=" << fPostContainerSumEPhotonsBack/keV << " keV"
+           << " | nPhotons_fwd=" << fPostContainerNPhotonsFwd 
+           << " sumE_fwd=" << fPostContainerSumEPhotonsFwd/keV << " keV"
+           << " | nElec_back=" << fPostContainerNElectronsBack 
+           << " sumE_back=" << fPostContainerSumEElectronsBack/keV << " keV"
+           << " | nElec_fwd=" << fPostContainerNElectronsFwd 
+           << " sumE_fwd=" << fPostContainerSumEElectronsFwd/keV << " keV";
+        Logger::GetInstance()->LogLine(ps.str());
+    }
 }
+
+// ═══════════════════════════════════════════════════════════════
+// ENREGISTREMENT DES PASSAGES
+// ═══════════════════════════════════════════════════════════════
 
 void EventAction::RecordPrimaryUpstream(G4int trackID, G4double energy)
 {
     auto it = fTrackIDtoIndex.find(trackID);
     if (it != fTrackIDtoIndex.end()) {
-        size_t index = it->second;
-        fPrimaryGammas[index].energyUpstream = energy;
-        fPrimaryGammas[index].detectedUpstream = true;
+        fPrimaryGammas[it->second].detectedUpstream = true;
+        fPrimaryGammas[it->second].energyUpstream = energy;
     }
 }
 
@@ -242,13 +295,35 @@ void EventAction::RecordPrimaryDownstream(G4int trackID, G4double energy)
 {
     auto it = fTrackIDtoIndex.find(trackID);
     if (it != fTrackIDtoIndex.end()) {
-        size_t index = it->second;
-        fPrimaryGammas[index].energyDownstream = energy;
-        fPrimaryGammas[index].detectedDownstream = true;
+        fPrimaryGammas[it->second].detectedDownstream = true;
+        fPrimaryGammas[it->second].energyDownstream = energy;
+    }
+}
 
-        G4double deltaE = std::abs(fPrimaryGammas[index].energyUpstream - energy);
-        if (deltaE < fTransmissionTolerance) {
-            fPrimaryGammas[index].transmitted = true;
+void EventAction::RecordFilterExit(G4int trackID, G4double energy)
+{
+    auto it = fTrackIDtoIndex.find(trackID);
+    if (it != fTrackIDtoIndex.end()) {
+        fPrimaryGammas[it->second].exitedFilter = true;
+    }
+}
+
+void EventAction::RecordWaterEntry(G4int trackID, G4double energy)
+{
+    auto it = fTrackIDtoIndex.find(trackID);
+    if (it != fTrackIDtoIndex.end()) {
+        fPrimaryGammas[it->second].enteredWater = true;
+    }
+}
+
+void EventAction::RecordGammaAbsorbed(G4int trackID, const G4String& volumeName)
+{
+    auto it = fTrackIDtoIndex.find(trackID);
+    if (it != fTrackIDtoIndex.end()) {
+        if (volumeName.find("Filter") != std::string::npos) {
+            fPrimaryGammas[it->second].absorbedInFilter = true;
+        } else if (volumeName.find("Water") != std::string::npos) {
+            fPrimaryGammas[it->second].absorbedInWater = true;
         }
     }
 }
@@ -263,14 +338,25 @@ void EventAction::RecordSecondaryDownstream(G4int trackID, G4int parentID,
     info.pdgCode = pdgCode;
     info.energy = energy;
     info.creatorProcess = process;
-
     fSecondariesDownstream.push_back(info);
 }
+
+// ═══════════════════════════════════════════════════════════════
+// DOSE DANS LES ANNEAUX D'EAU
+// ═══════════════════════════════════════════════════════════════
 
 void EventAction::AddRingEnergy(G4int ringIndex, G4double edep)
 {
     if (ringIndex >= 0 && ringIndex < DetectorConstruction::kNbWaterRings) {
         fRingEnergyDeposit[ringIndex] += edep;
+    }
+}
+
+void EventAction::AddRingEnergyByLine(G4int ringIndex, G4int lineIndex, G4double edep)
+{
+    if (ringIndex >= 0 && ringIndex < DetectorConstruction::kNbWaterRings &&
+        lineIndex >= 0 && lineIndex < kNbGammaLines) {
+        fRingEnergyByLine[ringIndex][lineIndex] += edep;
     }
 }
 
@@ -285,11 +371,55 @@ G4double EventAction::GetRingEnergy(G4int ringIndex) const
 G4double EventAction::GetTotalWaterEnergy() const
 {
     G4double total = 0.;
-    for (G4int i = 0; i < DetectorConstruction::kNbWaterRings; ++i) {
-        total += fRingEnergyDeposit[i];
+    for (const auto& edep : fRingEnergyDeposit) {
+        total += edep;
     }
     return total;
 }
+
+// ═══════════════════════════════════════════════════════════════
+// COMPTAGES AUX PLANS CONTAINER
+// ═══════════════════════════════════════════════════════════════
+
+void EventAction::AddPreContainerPhoton(G4double energy)
+{
+    fPreContainerNPhotons++;
+    fPreContainerSumEPhotons += energy;
+}
+
+void EventAction::AddPreContainerElectron(G4double energy)
+{
+    fPreContainerNElectrons++;
+    fPreContainerSumEElectrons += energy;
+}
+
+void EventAction::AddPostContainerPhotonBack(G4double energy)
+{
+    fPostContainerNPhotonsBack++;
+    fPostContainerSumEPhotonsBack += energy;
+}
+
+void EventAction::AddPostContainerElectronBack(G4double energy)
+{
+    fPostContainerNElectronsBack++;
+    fPostContainerSumEElectronsBack += energy;
+}
+
+void EventAction::AddPostContainerPhotonFwd(G4double energy)
+{
+    fPostContainerNPhotonsFwd++;
+    fPostContainerSumEPhotonsFwd += energy;
+}
+
+void EventAction::AddPostContainerElectronFwd(G4double energy)
+{
+    fPostContainerNElectronsFwd++;
+    fPostContainerSumEElectronsFwd += energy;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// STATISTIQUES
+// ═══════════════════════════════════════════════════════════════
 
 G4int EventAction::GetNumberTransmitted() const
 {
@@ -304,7 +434,7 @@ G4int EventAction::GetNumberAbsorbed() const
 {
     G4int count = 0;
     for (const auto& gamma : fPrimaryGammas) {
-        if (gamma.detectedUpstream && !gamma.detectedDownstream) count++;
+        if (!gamma.detectedDownstream) count++;
     }
     return count;
 }
@@ -312,4 +442,13 @@ G4int EventAction::GetNumberAbsorbed() const
 G4bool EventAction::IsPrimaryTrack(G4int trackID) const
 {
     return fTrackIDtoIndex.find(trackID) != fTrackIDtoIndex.end();
+}
+
+G4int EventAction::GetGammaLineForTrack(G4int trackID) const
+{
+    auto it = fTrackIDtoIndex.find(trackID);
+    if (it != fTrackIDtoIndex.end()) {
+        return fPrimaryGammas[it->second].gammaLineIndex;
+    }
+    return -1;
 }

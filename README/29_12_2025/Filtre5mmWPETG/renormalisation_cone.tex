@@ -1,0 +1,394 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath, amssymb}
+\usepackage{tikz}
+\usepackage{geometry}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage{fancybox}
+
+\geometry{margin=2.5cm}
+
+\usetikzlibrary{patterns, arrows.meta, calc, decorations.pathmorphing}
+
+\definecolor{source}{RGB}{255,200,0}
+\definecolor{cone20}{RGB}{100,150,255}
+\definecolor{cone60}{RGB}{255,150,100}
+\definecolor{water}{RGB}{100,180,255}
+
+\title{Renormalisation pour une émission\\dans un cône restreint\\[0.5em]
+\large Simulation Monte Carlo -- Source Eu-152}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Problématique}
+
+\subsection{Contexte}
+
+La source Eu-152 a une activité de $A = 44$ kBq sur $4\pi$ stéradians (émission isotrope). Cependant, pour optimiser le temps de calcul de la simulation Monte Carlo, on souhaite restreindre l'émission des gammas dans un cône de demi-angle $\theta_{\text{cone}} = 20°$ dirigé vers le détecteur (couronnes d'eau).
+
+\subsection{Question}
+
+Comment relier les résultats obtenus avec $N_{\text{sim}}$ événements simulés dans le cône de 20° à un temps d'irradiation réel correspondant à la source isotrope de 44 kBq ?
+
+\section{Calcul de l'angle solide}
+
+\subsection{Formule générale}
+
+L'angle solide $\Omega$ d'un cône de demi-angle $\theta$ vu depuis son sommet est :
+
+\begin{equation}
+\boxed{\Omega = 2\pi \left(1 - \cos\theta\right)}
+\end{equation}
+
+\subsection{Application numérique}
+
+\subsubsection{Cône de 20° (simulation optimisée)}
+
+\begin{align}
+\Omega_{20°} &= 2\pi \left(1 - \cos 20°\right) \\
+&= 2\pi \left(1 - 0.9397\right) \\
+&= 2\pi \times 0.0603 \\
+&= \boxed{0.379 \text{ sr}}
+\end{align}
+
+\subsubsection{Sphère complète}
+
+\begin{equation}
+\Omega_{4\pi} = 4\pi = 12.566 \text{ sr}
+\end{equation}
+
+\subsection{Fraction de l'angle solide}
+
+La fraction de l'émission $4\pi$ couverte par le cône de 20° est :
+
+\begin{equation}
+f = \frac{\Omega_{20°}}{\Omega_{4\pi}} = \frac{0.379}{12.566} = \boxed{0.0302 = 3.02\%}
+\end{equation}
+
+\begin{center}
+\begin{tikzpicture}[scale=1.2, >=Stealth]
+    % Source
+    \fill[source] (0,0) circle (0.15);
+    \node[below] at (0, -0.3) {Source};
+    
+    % Cône 20°
+    \fill[cone20, opacity=0.4] (0,0) -- (5, {5*tan(20)}) arc (20:-20:5) -- cycle;
+    \draw[thick, cone20] (0,0) -- (5, {5*tan(20)});
+    \draw[thick, cone20] (0,0) -- (5, {-5*tan(20)});
+    
+    % Arc 20°
+    \draw[thick, cone20] (1.5, 0) arc (0:20:1.5);
+    \draw[thick, cone20] (1.5, 0) arc (0:-20:1.5);
+    \node[cone20, right] at (1.7, 0.4) {\footnotesize $20°$};
+    
+    % Sphère 4π (représentation partielle)
+    \draw[dashed, gray] (0,0) circle (3);
+    \node[gray] at (2.5, 2.5) {$4\pi$};
+    
+    % Axe
+    \draw[->, thick] (0,0) -- (5.5, 0) node[right] {$z$};
+    
+    % Eau (cible)
+    \fill[water, opacity=0.6] (4.5, -1.2) rectangle (5, 1.2);
+    \draw[thick, blue] (4.5, -1.2) rectangle (5, 1.2);
+    \node[blue, right] at (5.1, 0) {\footnotesize Eau};
+    
+    % Annotations
+    \node[draw, fill=white, anchor=north west] at (-1, -2) {
+        \begin{tabular}{ll}
+        $\Omega_{20°}$ & $= 0.379$ sr \\
+        $f$ & $= 3.02\%$ de $4\pi$
+        \end{tabular}
+    };
+\end{tikzpicture}
+\end{center}
+
+\section{Principe de la renormalisation}
+
+\subsection{Équivalence physique}
+
+Lorsqu'on simule $N_{\text{sim}}$ événements (désintégrations) dans un cône de demi-angle $\theta_{\text{cone}}$, on échantillonne uniquement la fraction $f$ de l'émission totale.
+
+\textbf{Principe fondamental :} Ces $N_{\text{sim}}$ événements dans le cône correspondent au même nombre de gammas qu'une source isotrope aurait émis dans ce même cône après avoir effectué $N_{4\pi}$ désintégrations sur $4\pi$.
+
+\begin{equation}
+\boxed{N_{4\pi} = \frac{N_{\text{sim}}}{f}}
+\end{equation}
+
+\subsection{Interprétation}
+
+\begin{itemize}
+    \item $N_{\text{sim}}$ = nombre d'événements simulés dans le cône
+    \item $N_{4\pi}$ = nombre équivalent de désintégrations de la source isotrope
+    \item $f$ = fraction de l'angle solide ($\Omega_{\text{cone}} / 4\pi$)
+\end{itemize}
+
+\textbf{Exemple :} Si on simule $N_{\text{sim}} = 100\,000$ événements dans un cône de 20° :
+\begin{equation}
+N_{4\pi} = \frac{100\,000}{0.0302} = 3.31 \times 10^6 \text{ désintégrations sur } 4\pi
+\end{equation}
+
+\section{Calcul du temps d'irradiation}
+
+\subsection{Relation activité -- temps}
+
+L'activité $A$ de la source est définie comme le nombre de désintégrations par seconde :
+
+\begin{equation}
+A = \frac{N_{\text{désintégrations}}}{\Delta t}
+\end{equation}
+
+Donc le temps correspondant à $N_{4\pi}$ désintégrations est :
+
+\begin{equation}
+\boxed{T_{\text{irr}} = \frac{N_{4\pi}}{A} = \frac{N_{\text{sim}}}{f \cdot A}}
+\end{equation}
+
+\subsection{Prise en compte du nombre de gammas par désintégration}
+
+Pour l'Eu-152, chaque désintégration produit en moyenne $\bar{n}_\gamma = 1.924$ gammas (dans le spectre considéré). Si la simulation génère des \textit{gammas} (et non des désintégrations), il faut en tenir compte :
+
+\begin{equation}
+\boxed{T_{\text{irr}} = \frac{N_{\text{sim}}}{f \cdot A \cdot \bar{n}_\gamma}}
+\end{equation}
+
+\subsection{Application numérique}
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Paramètre} & \textbf{Valeur} \\
+\midrule
+Activité $A$ & $44\,000$ Bq \\
+Demi-angle du cône $\theta$ & $20°$ \\
+Fraction $f$ & $0.0302$ \\
+Gammas par désintégration $\bar{n}_\gamma$ & $1.924$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{Temps par événement simulé}
+
+\begin{align}
+t_1 &= \frac{1}{f \cdot A \cdot \bar{n}_\gamma} \\
+&= \frac{1}{0.0302 \times 44\,000 \times 1.924} \\
+&= \frac{1}{2556} \text{ s} \\
+&= \boxed{0.391 \text{ ms par événement}}
+\end{align}
+
+\subsubsection{Temps pour $N_{\text{sim}}$ événements}
+
+\begin{equation}
+\boxed{T_{\text{irr}} = N_{\text{sim}} \times 0.391 \text{ ms}}
+\end{equation}
+
+\begin{center}
+\begin{tabular}{rr}
+\toprule
+$N_{\text{sim}}$ & $T_{\text{irr}}$ \\
+\midrule
+$10\,000$ & $3.91$ s \\
+$100\,000$ & $39.1$ s \\
+$1\,000\,000$ & $6.52$ min \\
+$10\,000\,000$ & $1.09$ h \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Formules récapitulatives}
+
+\subsection{Formule générale du temps d'irradiation}
+
+\begin{equation}
+\boxed{T_{\text{irr}} = \frac{N_{\text{sim}} \cdot 4\pi}{2\pi(1-\cos\theta_{\text{cone}}) \cdot A \cdot \bar{n}_\gamma} = \frac{2 \cdot N_{\text{sim}}}{(1-\cos\theta_{\text{cone}}) \cdot A \cdot \bar{n}_\gamma}}
+\end{equation}
+
+\subsection{Formule du débit de dose}
+
+Si la simulation donne une dose totale $D_{\text{sim}}$ (en Gy) pour $N_{\text{sim}}$ événements, le débit de dose est :
+
+\begin{equation}
+\boxed{\dot{D} = \frac{D_{\text{sim}}}{T_{\text{irr}}} = \frac{D_{\text{sim}} \cdot f \cdot A \cdot \bar{n}_\gamma}{N_{\text{sim}}}}
+\end{equation}
+
+\subsection{Vérification dimensionnelle}
+
+\begin{align}
+[\dot{D}] &= \frac{[\text{Gy}] \times [\text{sr}] \times [\text{Bq}] \times [1]}{[\text{sr}] \times [1]} \\
+&= \frac{\text{Gy} \times \text{s}^{-1}}{1} = \text{Gy/s}
+\end{align}
+
+\section{Comparaison des configurations}
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Configuration} & $\theta$ & $f$ & $T_{\text{irr}}$ pour $10^5$ évts \\
+\midrule
+Cône actuel (60°) & $60°$ & $25.0\%$ & $4.72$ s \\
+Cône optimisé (20°) & $20°$ & $3.02\%$ & $39.1$ s \\
+Cône très restreint (10°) & $10°$ & $0.76\%$ & $155$ s \\
+Isotrope ($4\pi$) & $180°$ & $100\%$ & $1.18$ s \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Interprétation :} Plus le cône est restreint, plus chaque événement simulé représente un temps d'irradiation long (car on concentre les gammas simulés dans une direction utile).
+
+\section{Implémentation dans le code Geant4}
+
+\subsection{Modification de PrimaryGeneratorAction}
+
+Pour changer le demi-angle du cône d'émission, modifier dans \texttt{PrimaryGeneratorAction.cc} :
+
+\begin{verbatim}
+// Ancien (60°)
+G4double maxCosTheta = std::cos(60.0 * deg);
+
+// Nouveau (20°)
+G4double maxCosTheta = std::cos(20.0 * deg);
+\end{verbatim}
+
+\subsection{Calcul automatique dans RunAction}
+
+Modifier \texttt{RunAction.cc} pour calculer le temps d'irradiation correct :
+
+\begin{verbatim}
+// Paramètres
+G4double coneAngle = 20.0 * deg;           // Demi-angle du cône
+G4double activity = 44000.0;               // Bq
+G4double gammasPerDecay = 1.924;
+
+// Fraction de l'angle solide
+G4double f = (1.0 - std::cos(coneAngle)) / 2.0;
+
+// Temps d'irradiation
+G4double T_irr = nofEvents / (f * activity * gammasPerDecay);
+\end{verbatim}
+
+\section{Résumé et formules clés}
+
+\begin{center}
+\shadowbox{
+\begin{minipage}{0.9\textwidth}
+\textbf{Formules essentielles pour la renormalisation}
+
+\vspace{0.5em}
+
+\textbf{1. Fraction de l'angle solide :}
+\begin{equation*}
+f = \frac{1 - \cos\theta_{\text{cone}}}{2}
+\end{equation*}
+
+\textbf{2. Temps d'irradiation équivalent :}
+\begin{equation*}
+T_{\text{irr}} = \frac{N_{\text{sim}}}{f \cdot A \cdot \bar{n}_\gamma}
+\end{equation*}
+
+\textbf{3. Application pour $\theta = 20°$, $A = 44$ kBq, $\bar{n}_\gamma = 1.924$ :}
+\begin{equation*}
+T_{\text{irr}} = N_{\text{sim}} \times 0.391 \text{ ms}
+\end{equation*}
+
+\textbf{4. Débit de dose :}
+\begin{equation*}
+\dot{D} = \frac{D_{\text{sim}}}{T_{\text{irr}}}
+\end{equation*}
+\end{minipage}
+}
+\end{center}
+
+\newpage
+\section{Annexe : Schéma géométrique}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[scale=0.7, >=Stealth]
+
+    % Fond
+    \fill[gray!5] (-2,-5) rectangle (14,5);
+    
+    % Axe z
+    \draw[->, ultra thick] (-1,0) -- (13,0) node[right] {\textbf{z}};
+    
+    % Source
+    \fill[source] (2, 0) circle (0.2);
+    \node[below=0.3cm] at (2, 0) {Source};
+    \node[above=0.2cm] at (2, 0) {Eu-152};
+    
+    % Cône 60° (ancien, en transparence)
+    \fill[cone60, opacity=0.15] (2,0) -- (12, {10*tan(60)}) -- (12, {-10*tan(60)}) -- cycle;
+    \draw[thick, cone60, dashed] (2,0) -- (8, {6*tan(60)});
+    \draw[thick, cone60, dashed] (2,0) -- (8, {-6*tan(60)});
+    \node[cone60] at (5, 3.5) {\footnotesize Ancien cône 60°};
+    
+    % Cône 20° (nouveau)
+    \fill[cone20, opacity=0.4] (2,0) -- (12, {10*tan(20)}) -- (12, {-10*tan(20)}) -- cycle;
+    \draw[ultra thick, cone20] (2,0) -- (12, {10*tan(20)});
+    \draw[ultra thick, cone20] (2,0) -- (12, {-10*tan(20)});
+    
+    % Arc 20°
+    \draw[ultra thick, cone20] ({2+2}, 0) arc (0:20:2);
+    \draw[ultra thick, cone20] ({2+2}, 0) arc (0:-20:2);
+    \node[cone20, right] at (4.3, 0.5) {\footnotesize $20°$};
+    
+    % Filtre
+    \fill[gray!50] (3.75, -2.5) rectangle (4.25, 2.5);
+    \draw[thick] (3.75, -2.5) rectangle (4.25, 2.5);
+    \node[above] at (4, 2.6) {\footnotesize Filtre};
+    
+    % Container + Eau
+    \fill[gray!50] (9.65, 2.5) rectangle (10.55, 2.7);
+    \fill[gray!50] (9.65, -2.5) rectangle (10.55, -2.7);
+    \fill[gray!50] (10.35, -2.7) rectangle (10.55, 2.7);
+    \fill[water] (9.85, -2.5) rectangle (10.35, 2.5);
+    \draw[thick] (9.65, 2.5) rectangle (10.55, 2.7);
+    \draw[thick] (9.65, -2.5) rectangle (10.55, -2.7);
+    \draw[thick, blue] (9.85, -2.5) rectangle (10.35, 2.5);
+    \node[above] at (10, 2.8) {\footnotesize Container + Eau};
+    
+    % Légende
+    \node[draw, fill=white, anchor=north west] at (10.5, -2) {
+        \footnotesize
+        \begin{tabular}{ll}
+        \textcolor{cone60}{---} & Cône 60° ($f=25\%$) \\
+        \textcolor{cone20}{\rule{0.5cm}{2pt}} & Cône 20° ($f=3\%$) \\
+        \end{tabular}
+    };
+    
+    % Distances
+    \draw[<->, thick] (2, -4) -- (9.85, -4);
+    \node[below] at (5.9, -4) {\footnotesize 7.85 cm};
+
+\end{tikzpicture}
+\caption{Comparaison entre le cône d'émission de 60° (actuel) et le cône optimisé de 20°. Le cône de 20° concentre les gammas simulés vers le détecteur, améliorant l'efficacité statistique au prix d'un temps d'irradiation équivalent plus long par événement.}
+\end{figure}
+
+\section{Annexe : Tableau de conversion rapide}
+
+Pour $\theta = 20°$, $A = 44$ kBq, $\bar{n}_\gamma = 1.924$ :
+
+\begin{center}
+\begin{tabular}{rrrl}
+\toprule
+$N_{\text{sim}}$ & $T_{\text{irr}}$ & & Commentaire \\
+\midrule
+$1\,000$ & $0.391$ s & & Test rapide \\
+$10\,000$ & $3.91$ s & & Validation \\
+$100\,000$ & $39.1$ s & $\approx 0.65$ min & Production légère \\
+$500\,000$ & $196$ s & $\approx 3.3$ min & Production moyenne \\
+$1\,000\,000$ & $391$ s & $\approx 6.5$ min & Production standard \\
+$5\,000\,000$ & $1956$ s & $\approx 33$ min & Haute statistique \\
+$10\,000\,000$ & $3912$ s & $\approx 1.1$ h & Très haute statistique \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\end{document}

@@ -1,0 +1,24 @@
+\contentsline {section}{\numberline {1}\Large \color {blue} \textbf {Configuration de la simulation}\color {black}}{3}{section.1}%
+\contentsline {section}{\numberline {2}\Large \color {blue} \textbf {Description de la géométrie}\color {black}}{3}{section.2}%
+\contentsline {subsection}{\numberline {2.1}\color {blue}\textbf {Vue de face des couronnes d'eau (plan xy)}\color {black}}{4}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}\color {blue}\textbf {Récapitulatif des positions (axe z)}\color {black}}{4}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}\color {blue}\textbf {Visualisation des angles solides}\color {black}}{4}{subsection.2.3}%
+\contentsline {section}{\numberline {3}\Large \color {blue} \textbf {Angles solides et normalisation}\color {black}}{4}{section.3}%
+\contentsline {subsection}{\numberline {3.1}\color {blue}\textbf {Définition des angles solides}\color {black}}{5}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}\color {blue}\textbf {Principe de la renormalisation}\color {black}}{6}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}\color {blue}\textbf {Calcul du temps d'irradiation}\color {black}}{6}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}\color {blue}\textbf {Formules récapitulatives}\color {black}}{7}{subsection.3.4}%
+\contentsline {subsection}{\numberline {3.5}\color {blue}\textbf {Implémentation dans le code Geant4}\color {black}}{7}{subsection.3.5}%
+\contentsline {section}{\numberline {4}\Large \color {blue} \textbf {Structure des données ROOT}\color {black}}{8}{section.4}%
+\contentsline {subsection}{\numberline {4.1}\color {blue}\textbf {Histogrammes}\color {black}}{8}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}\color {blue}\textbf {Ntuples}\color {black}}{9}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}\color {blue}\textbf {Flux de données}\color {black}}{10}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}\color {blue}\textbf {Exemples d'analyse ROOT}\color {black}}{11}{subsection.4.4}%
+\contentsline {section}{\numberline {5}\Large \color {blue} \textbf {Vérification de la cohérence de la simulation}\color {black}}{12}{section.5}%
+\contentsline {subsection}{\numberline {5.1}\color {blue}\textbf {Génération des Gammas Primaires}\color {black}}{12}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}\color {blue}\textbf {Transmission à Travers le Filtre W/PETG}\color {black}}{12}{subsection.5.2}%
+\contentsline {subsection}{\numberline {5.3}\color {blue}\textbf {Bilan des Particules}\color {black}}{14}{subsection.5.3}%
+\contentsline {subsection}{\numberline {5.4}\color {blue}\textbf {Dose dans les Anneaux d'Eau}\color {black}}{14}{subsection.5.4}%
+\contentsline {subsection}{\numberline {5.5}\color {blue}\textbf {Renormalisation Temporelle}\color {black}}{15}{subsection.5.5}%
+\contentsline {subsection}{\numberline {5.6}\color {blue}\textbf {Vérification de la Cohérence Globale}\color {black}}{16}{subsection.5.6}%
+\contentsline {subsection}{\numberline {5.7}\color {blue}\textbf {Résultats}\color {black}}{17}{subsection.5.7}%

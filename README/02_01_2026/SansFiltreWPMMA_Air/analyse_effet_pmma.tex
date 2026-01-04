@@ -1,0 +1,336 @@
+\documentclass[11pt,a4paper]{article}
+
+% ═══════════════════════════════════════════════════════════════
+% PACKAGES
+% ═══════════════════════════════════════════════════════════════
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french, provide=*]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{siunitx}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{caption}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{enumitem}
+
+% ═══════════════════════════════════════════════════════════════
+% CONFIGURATION
+% ═══════════════════════════════════════════════════════════════
+\geometry{margin=2.5cm}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!70!black,
+    urlcolor=blue!70!black
+}
+
+\sisetup{
+    locale = FR,
+    per-mode = symbol,
+    separate-uncertainty = true
+}
+
+% En-tête et pied de page
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Simulation Geant4 -- Effet du PMMA}
+\fancyhead[R]{\small \today}
+\fancyfoot[C]{\thepage}
+
+% Couleurs personnalisées
+\definecolor{aircolor}{RGB}{220, 220, 220}
+\definecolor{tungcolor}{RGB}{255, 220, 200}
+\definecolor{pmmacolor}{RGB}{200, 255, 200}
+\definecolor{ratiocolor}{RGB}{200, 220, 255}
+
+% ═══════════════════════════════════════════════════════════════
+% DOCUMENT
+% ═══════════════════════════════════════════════════════════════
+\begin{document}
+
+% ───────────────────────────────────────────────────────────────
+% TITRE
+% ───────────────────────────────────────────────────────────────
+\begin{center}
+    {\LARGE\bfseries Analyse de l'Effet du PMMA\\[0.3em]
+    sur la Production de Particules Secondaires}\\[1.5em]
+    {\large Simulation Geant4 -- Source ${}^{152}$Eu -- $25\times 10^6$ événements}\\[0.5em]
+    {\small \today}
+\end{center}
+
+\vspace{1em}
+
+% ═══════════════════════════════════════════════════════════════
+\section{Configurations comparées}
+% ═══════════════════════════════════════════════════════════════
+
+Trois configurations ont été simulées pour isoler l'effet de chaque composant :
+
+\begin{table}[H]
+\centering
+\caption{Matériaux des différentes configurations}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Configuration} & \textbf{PMMA (5 mm)} & \textbf{Feuille (20 µm)} & \textbf{Eau (5 mm)} \\
+\midrule
+\rowcolor{aircolor}
+Air (référence) & Air & Air & Air \\
+\rowcolor{tungcolor}
+Tungstène seul & Air & Tungstène & Air \\
+\rowcolor{pmmacolor}
+PMMA + Tungstène & \textbf{PMMA} & Tungstène & Air \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ═══════════════════════════════════════════════════════════════
+\section{Effet du PMMA sur le PreContainerPlane}
+% ═══════════════════════════════════════════════════════════════
+
+Le PreContainerPlane est situé juste avant la région d'eau, après le bloc de PMMA. C'est ici que l'effet du PMMA est le plus visible.
+
+\subsection{Photons entrant dans l'eau}
+
+\begin{table}[H]
+\centering
+\caption{Statistiques des photons au PreContainerPlane}
+\begin{tabular}{l>{\columncolor{aircolor}}c>{\columncolor{tungcolor}}c>{\columncolor{pmmacolor}}c>{\columncolor{ratiocolor}}c}
+\toprule
+\textbf{Observable} & \textbf{Air} & \textbf{W seul} & \textbf{PMMA + W} & \textbf{Variation} \\
+\midrule
+Mean $\langle N_\gamma \rangle$ & 1.155 & 1.155 & 1.129 & $-2.3\%$ \\
+Std Dev & 0.990 & 0.990 & 0.982 & $-0.8\%$ \\
+Énergie moyenne & \SI{1124}{keV} & \SI{1124}{keV} & \SI{1111}{keV} & $-1.2\%$ \\
+Std Dev énergie & \SI{783}{keV} & \SI{783}{keV} & \SI{774}{keV} & $-1.1\%$ \\
+Entries ($E > 0$) & $2.79\times 10^7$ & $2.79\times 10^7$ & $2.76\times 10^7$ & $-1.1\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Interprétation :}
+Le PMMA (5~mm, $\rho \approx 1.18$~g/cm$^3$) absorbe environ \textbf{2--3\%} des photons incidents et réduit légèrement leur énergie moyenne par diffusion Compton. Cet effet est modéré car le PMMA est un matériau de faible Z (H, C, O).
+
+\subsection{Électrons entrant dans l'eau -- Changement majeur}
+
+\begin{table}[H]
+\centering
+\caption{Statistiques des électrons au PreContainerPlane}
+\begin{tabular}{l>{\columncolor{aircolor}}c>{\columncolor{tungcolor}}c>{\columncolor{pmmacolor}}c>{\columncolor{ratiocolor}}c}
+\toprule
+\textbf{Observable} & \textbf{Air} & \textbf{W seul} & \textbf{PMMA + W} & \textbf{Facteur} \\
+\midrule
+Mean $\langle N_{e^-} \rangle$ & $3.99\times 10^{-4}$ & $3.99\times 10^{-4}$ & $4.86\times 10^{-3}$ & $\bm{\times 12.2}$ \\
+Std Dev & 0.0208 & 0.0208 & 0.0735 & $\times 3.5$ \\
+Énergie moyenne & \SI{346}{keV} & \SI{346}{keV} & \SI{478}{keV} & $\bm{\times 1.38}$ \\
+Std Dev énergie & \SI{333}{keV} & \SI{333}{keV} & \SI{273}{keV} & $\times 0.82$ \\
+Entries ($E > 0$) & 9\,607 & 9\,607 & 114\,723 & $\bm{\times 11.9}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Résultat majeur :}
+\begin{center}
+\fbox{\parbox{0.9\textwidth}{
+\centering
+\textbf{Le PMMA produit 12 fois plus d'électrons que l'air !}\\[0.5em]
+Mean : $3.99\times 10^{-4} \rightarrow 4.86\times 10^{-3}$ (facteur $\times 12.2$)\\
+Entries : $9\,607 \rightarrow 114\,723$ (facteur $\times 11.9$)
+}}
+\end{center}
+
+\paragraph{Origine physique des électrons :}
+\begin{itemize}[noitemsep]
+    \item \textbf{Effet Compton} : Processus dominant dans le PMMA pour les photons de 100~keV à 1~MeV
+    \item \textbf{Composition} : Le PMMA (C$_5$H$_8$O$_2$) contient des éléments légers favorisant le Compton
+    \item \textbf{Énergie plus élevée} : 478~keV vs 346~keV indique des électrons Compton de haute énergie
+    \item \textbf{Épaisseur} : 5~mm de PMMA offre suffisamment de matière pour les interactions
+\end{itemize}
+
+% ═══════════════════════════════════════════════════════════════
+\section{Effet sur le PostContainerPlane}
+% ═══════════════════════════════════════════════════════════════
+
+\subsection{Photons transmis}
+
+\begin{table}[H]
+\centering
+\caption{Statistiques des photons transmis au PostContainerPlane}
+\begin{tabular}{l>{\columncolor{tungcolor}}c>{\columncolor{pmmacolor}}c>{\columncolor{ratiocolor}}c}
+\toprule
+\textbf{Observable} & \textbf{W seul} & \textbf{PMMA + W} & \textbf{Variation} \\
+\midrule
+Mean $\langle N_\gamma \rangle$ & 1.027 & 1.000 & $-2.6\%$ \\
+Std Dev & 0.943 & 0.933 & $-1.1\%$ \\
+Énergie moyenne & \SI{1069}{keV} & \SI{1058}{keV} & $-1.0\%$ \\
+Entries & $2.57\times 10^7$ & $2.45\times 10^7$ & $-4.7\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Photons rétrodiffusés (backscatter)}
+
+\begin{table}[H]
+\centering
+\caption{Statistiques des photons backscatter au PostContainerPlane}
+\begin{tabular}{l>{\columncolor{tungcolor}}c>{\columncolor{pmmacolor}}c>{\columncolor{ratiocolor}}c}
+\toprule
+\textbf{Observable} & \textbf{W seul} & \textbf{PMMA + W} & \textbf{Variation} \\
+\midrule
+Mean $\langle N_\gamma \rangle$ & $8.11\times 10^{-3}$ & $8.08\times 10^{-3}$ & $\sim 0\%$ \\
+Std Dev & 0.0956 & 0.0954 & $\sim 0\%$ \\
+Énergie moyenne & \SI{80.7}{keV} & \SI{81.1}{keV} & $\sim 0\%$ \\
+Entries & 189\,338 & 188\,544 & $\sim 0\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Observation importante :}
+Le backscatter des photons est \textbf{identique} dans les deux configurations. Il est entièrement dominé par la \textbf{fluorescence X du tungstène} (pic à 60--80~keV), et le PMMA n'a aucune influence sur ce processus.
+
+\subsection{Électrons transmis}
+
+\begin{table}[H]
+\centering
+\caption{Statistiques des électrons transmis au PostContainerPlane}
+\begin{tabular}{l>{\columncolor{tungcolor}}c>{\columncolor{pmmacolor}}c>{\columncolor{ratiocolor}}c}
+\toprule
+\textbf{Observable} & \textbf{W seul} & \textbf{PMMA + W} & \textbf{Facteur} \\
+\midrule
+Mean $\langle N_{e^-} \rangle$ & $4.13\times 10^{-4}$ & $4.18\times 10^{-3}$ & $\bm{\times 10.1}$ \\
+Std Dev & 0.0210 & 0.0681 & $\times 3.2$ \\
+Énergie moyenne & \SI{290}{keV} & \SI{477}{keV} & $\bm{\times 1.64}$ \\
+Entries & 9\,973 & 99\,092 & $\bm{\times 9.9}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Électrons rétrodiffusés (backscatter)}
+
+\begin{table}[H]
+\centering
+\caption{Statistiques des électrons backscatter au PostContainerPlane}
+\begin{tabular}{l>{\columncolor{tungcolor}}c>{\columncolor{pmmacolor}}c>{\columncolor{ratiocolor}}c}
+\toprule
+\textbf{Observable} & \textbf{W seul} & \textbf{PMMA + W} & \textbf{Facteur} \\
+\midrule
+Mean $\langle N_{e^-} \rangle$ & $1.66\times 10^{-3}$ & $3.38\times 10^{-3}$ & $\bm{\times 2.0}$ \\
+Std Dev & 0.0453 & 0.0648 & $\times 1.4$ \\
+Énergie moyenne & \SI{156}{keV} & \SI{267}{keV} & $\bm{\times 1.71}$ \\
+Entries & 37\,350 & 75\,342 & $\bm{\times 2.0}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ═══════════════════════════════════════════════════════════════
+\section{Analyse des figures}
+% ═══════════════════════════════════════════════════════════════
+
+\subsection{Figure PreContainer (4 panneaux)}
+
+\paragraph{Photons (panneaux supérieurs) 
+\begin{itemize}[noitemsep]
+    \item Distribution du nombre de photons similaire mais légèrement décalée vers la gauche
+    \item Mean = 1.129 (vs 1.155 sans PMMA) : perte de $\sim$2\%
+    \item Spectre d'énergie quasi-identique avec pics des raies Eu-152 visibles
+\end{itemize}
+
+\paragraph{Électrons (panneaux inférieurs) -- Changement majeur :}
+\begin{itemize}[noitemsep]
+    \item Distribution beaucoup plus étendue : jusqu'à $N_{e^-} = 5$ (vs 3--4 sans PMMA)
+    \item Nombre d'entrées $\times 12$ : 114\,723 vs 9\,607
+    \item Spectre d'énergie en forme de ``bosse'' caractéristique de l'effet Compton
+    \item Pic vers 500--600~keV avec coupure nette à $\sim$1400~keV (bord Compton)
+\end{itemize}
+
+\subsection{Figure Comparaison Pre/Post (photons)}
+
+\begin{itemize}[noitemsep]
+    \item \textbf{Perte de photons} : $(1.129 - 1.000) / 1.129 = 11.4\%$ (vs 11.1\% sans PMMA)
+    \item Les spectres Pre et Post sont quasi-superposés
+    \item La forme spectrale n'est pas modifiée par le passage à travers l'eau (en air) et le tungstène
+\end{itemize}
+
+\subsection{Figure Photons backscatter}
+
+\begin{itemize}[noitemsep]
+    \item Pic de fluorescence X du tungstène toujours dominant à \textbf{60--80~keV}
+    \item Raies K$_\alpha$ (58--59~keV) et K$_\beta$ (67--69~keV) du W
+    \item \textbf{Identique} à la configuration sans PMMA $\rightarrow$ le tungstène domine le backscatter $\gamma$
+    \item Queue Compton jusqu'à $\sim$1200~keV
+\end{itemize}
+
+\subsection{Figure Électrons transmis}
+
+\begin{itemize}[noitemsep]
+    \item Spectre très différent de la configuration sans PMMA
+    \item Forme en ``bosse'' avec pic à $\sim$500~keV
+    \item Queue jusqu'à $\sim$1500~keV (électrons Compton de haute énergie)
+    \item Entries : 99\,092 (vs 9\,973 sans PMMA) $\rightarrow$ facteur $\times 10$
+\end{itemize}
+
+\subsection{Figure Électrons backscatter}
+
+\begin{itemize}[noitemsep]
+    \item Distribution plus large : jusqu'à $N_{e^-} = 8$ (vs 7 sans PMMA)
+    \item Spectre d'énergie élargi avec pic à $\sim$200--300~keV
+    \item Queue étendue jusqu'à $\sim$2500~keV (vs 1800~keV sans PMMA)
+    \item Doublement du nombre d'électrons backscatter : 75\,342 vs 37\,350
+\end{itemize}
+
+% ═══════════════════════════════════════════════════════════════
+\section{Tableau récapitulatif}
+% ═══════════════════════════════════════════════════════════════
+
+\begin{table}[H]
+\centering
+\caption{Synthèse de l'effet du PMMA sur toutes les observables}
+\begin{tabular}{llccc}
+\toprule
+\textbf{Plan} & \textbf{Observable} & \textbf{W seul} & \textbf{PMMA + W} & \textbf{Facteur} \\
+\midrule
+\multirow{2}{*}{PreContainer} 
+    & Photons (Mean) & 1.155 & 1.129 & $\times 0.98$ \\
+    & \textbf{Électrons (Mean)} & $3.99\times 10^{-4}$ & $4.86\times 10^{-3}$ & $\bm{\times 12.2}$ \\
+\midrule
+\multirow{2}{*}{PostContainer transmis}
+    & Photons (Mean) & 1.027 & 1.000 & $\times 0.97$ \\
+    & \textbf{Électrons (Mean)} & $4.13\times 10^{-4}$ & $4.18\times 10^{-3}$ & $\bm{\times 10.1}$ \\
+\midrule
+\multirow{2}{*}{PostContainer backscatter}
+    & Photons (Mean) & $8.11\times 10^{-3}$ & $8.08\times 10^{-3}$ & $\times 1.0$ \\
+    & \textbf{Électrons (Mean)} & $1.66\times 10^{-3}$ & $3.38\times 10^{-3}$ & $\bm{\times 2.0}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ═══════════════════════════════════════════════════════════════
+\section{Conclusions}
+% ═══════════════════════════════════════════════════════════════
+
+\begin{enumerate}
+    \item \textbf{Production massive d'électrons Compton} : Le PMMA (5~mm) multiplie par \textbf{12} le nombre d'électrons entrant dans la région d'eau. C'est l'effet le plus significatif observé.
+    
+    \item \textbf{Électrons de haute énergie} : L'énergie moyenne des électrons augmente de 346~keV à 478~keV, indiquant une production dominée par l'effet Compton avec des photons de haute énergie.
+    
+    \item \textbf{Spectre Compton caractéristique} : Le spectre des électrons présente une forme en ``bosse'' avec une coupure nette correspondant au bord Compton des raies gamma de l'Eu-152.
+    
+    \item \textbf{Photons peu affectés} : Le PMMA n'absorbe que $\sim$2--3\% des photons et ne modifie pas significativement leur spectre d'énergie.
+    
+    \item \textbf{Backscatter photon inchangé} : La fluorescence X du tungstène (60--80~keV) domine complètement le backscatter des photons, indépendamment du PMMA.
+    
+    \item \textbf{Backscatter électron doublé} : Le doublement des électrons backscatter ($\times 2$) est une conséquence directe de l'augmentation des électrons incidents sur le tungstène.
+\end{enumerate}
+
+\vspace{1em}
+\noindent\fbox{\parbox{\textwidth}{
+\textbf{Implication pour la dosimétrie :} La présence du PMMA modifie considérablement le spectre de particules chargées atteignant l'eau. Les électrons Compton produits dans le PMMA contribueront significativement à la dose déposée dans les premiers millimètres d'eau, un effet qui sera visible lorsque le matériau ``eau'' sera activé dans la simulation.
+}}
+
+\end{document}

@@ -4,16 +4,24 @@
 
 #include "G4Run.hh"
 #include "G4RunManager.hh"
-#include "G4AnalysisManager.hh"
 #include "G4SystemOfUnits.hh"
-#include <cmath>
+#include "G4AnalysisManager.hh"
+#include <iomanip>
 #include <sstream>
+#include <cmath>
+
+// ═══════════════════════════════════════════════════════════════
+// CONSTANTES POUR LA CONVERSION EN DOSE
+// ═══════════════════════════════════════════════════════════════
+
+static const G4double kMeVtoJoule = 1.60218e-13;
+static const G4double kNanoGrayFactor = 0.160218;  // nGy per MeV per gram
 
 RunAction::RunAction()
 : G4UserRunAction(),
-  fActivity4pi(44000.0),           // 44 kBq
-  fConeAngle(20.0*deg),            // Cône de 20° pour optimiser l'irradiation
-  fSourcePosZ(2.0*cm),
+  fActivity4pi(3.7e7),
+  fConeAngle(20.*deg),
+  fSourcePosZ(2.*cm),
   fMeanGammasPerDecay(1.924),
   fTotalPrimariesGenerated(0),
   fTotalEventsWithZeroGamma(0),
@@ -29,106 +37,111 @@ RunAction::RunAction()
   fElectronsInWater(0),
   fGammasPreFilterPlane(0),
   fGammasPostFilterPlane(0),
-  fGammasPreWaterPlane(0),
-  fGammasPostWaterPlane(0),
-  fOutputFileName("puits_couronne_output")
+  fGammasPreContainerPlane(0),
+  fGammasPostContainerPlane(0),
+  fOutputFileName("puits_couronne.root")
 {
-    // Initialiser les tableaux
-    for (G4int i = 0; i < DetectorConstruction::kNbWaterRings; ++i) {
-        fRingTotalEnergy[i] = 0.;
-        fRingTotalEnergy2[i] = 0.;
-        fRingEventCount[i] = 0;
-        fRingMasses[i] = 0.;
+    fRingTotalEnergy.fill(0.);
+    fRingTotalEnergy2.fill(0.);
+    fRingEventCount.fill(0);
+    fRingMasses.fill(0.);
+    
+    for (auto& arr : fRingEnergyByLine) {
+        arr.fill(0.);
     }
-
-    // Configuration de G4AnalysisManager
-    auto analysisManager = G4AnalysisManager::Instance();
-    analysisManager->SetDefaultFileType("root");
-    analysisManager->SetVerboseLevel(1);
-    analysisManager->SetNtupleMerging(true);
-
-    G4cout << "\n╔════════════════════════════════════════════════════════════╗" << G4endl;
-    G4cout << "║  RunAction initialized - PUITS COURONNE                     ║" << G4endl;
-    G4cout << "║  Output file: " << fOutputFileName << ".root" << G4endl;
-    G4cout << "║  Dose measurement in " << DetectorConstruction::kNbWaterRings << " water rings" << G4endl;
-    G4cout << "╚════════════════════════════════════════════════════════════╝\n" << G4endl;
+    
+    fLineEmitted.fill(0);
+    fLineExitedFilter.fill(0);
+    fLineAbsorbedFilter.fill(0);
+    fLineEnteredWater.fill(0);
+    fLineAbsorbedWater.fill(0);
 }
 
 RunAction::~RunAction()
 {}
 
-// ═══════════════════════════════════════════════════════════════════════════
-// MÉTHODES DE CALCUL POUR LA RENORMALISATION SPATIALE ET TEMPORELLE
-// ═══════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+// CONVERSION D'UNITÉS
+// ═══════════════════════════════════════════════════════════════
 
-G4double RunAction::CalculateIrradiationTime(G4int nEvents) const
+G4double RunAction::EnergyToNanoGray(G4double energy_MeV, G4double mass_g)
 {
-    // ═══════════════════════════════════════════════════════════════
-    // CALCUL DU TEMPS D'IRRADIATION ÉQUIVALENT
-    // ═══════════════════════════════════════════════════════════════
-    //
-    // Principe :
-    // - La source a une activité A (Bq) sur 4π stéradians
-    // - On simule dans un cône de demi-angle θ (fraction f de 4π)
-    // - Chaque événement simulé = 1 désintégration dans le cône
-    // - Ces N_sim événements correspondent à N_4π = N_sim/f désintégrations
-    //   de la source isotrope
-    // - Le temps équivalent est T = N_4π / A = N_sim / (f × A)
-    //
-    // ═══════════════════════════════════════════════════════════════
-    
-    G4double f = GetSolidAngleFraction();
-    
-    if (f <= 0. || fActivity4pi <= 0.) {
-        return 0.;
-    }
-    
-    G4double T_irr = (G4double)nEvents / (f * fActivity4pi);
-    
-    return T_irr;  // en secondes
+    if (mass_g <= 0.) return 0.;
+    return energy_MeV * kNanoGrayFactor / mass_g;
 }
 
-G4double RunAction::CalculateDoseRate(G4double totalDose_Gy, G4int nEvents) const
+G4double RunAction::ConvertToNanoGray(G4double energy, G4double mass)
 {
-    // ═══════════════════════════════════════════════════════════════
-    // CALCUL DU DÉBIT DE DOSE
-    // ═══════════════════════════════════════════════════════════════
-    //
-    // Débit de dose = Dose totale / Temps d'irradiation
-    //               = D_sim / T_irr
-    //               = D_sim × f × A / N_sim
-    //
-    // ═══════════════════════════════════════════════════════════════
-    
-    G4double T_irr = CalculateIrradiationTime(nEvents);
-    
-    if (T_irr <= 0.) {
-        return 0.;
-    }
-    
-    return totalDose_Gy / T_irr;  // en Gy/s
+    G4double energy_MeV = energy / MeV;
+    G4double mass_g = mass / g;
+    return EnergyToNanoGray(energy_MeV, mass_g);
 }
+
+// ═══════════════════════════════════════════════════════════════
+// DÉBUT ET FIN DE RUN
+// ═══════════════════════════════════════════════════════════════
 
 void RunAction::BeginOfRunAction(const G4Run* run)
 {
-    G4cout << "### Run " << run->GetRunID() << " start." << G4endl;
-
-    // ═══════════════════════════════════════════════════════════════
-    // OUVRIR LE FICHIER DE LOG
-    // ═══════════════════════════════════════════════════════════════
-    Logger::GetInstance()->Open("output.log");
-    Logger::GetInstance()->SetEchoToConsole(false);  // Pas d'écho console
+    G4cout << "\n╔═══════════════════════════════════════════════════════════════╗" << G4endl;
+    G4cout << "║  DÉBUT DU RUN " << run->GetRunID() << G4endl;
+    G4cout << "╚═══════════════════════════════════════════════════════════════╝\n" << G4endl;
     
-    std::stringstream ss;
-    ss << "Run " << run->GetRunID() << " started";
-    Logger::GetInstance()->LogHeader(ss.str());
-
-    // Reset des compteurs
+    Logger::GetInstance()->Open("output.log");
+    Logger::GetInstance()->LogHeader("Démarrage du Run " + std::to_string(run->GetRunID()));
+    
+    // ═══════════════════════════════════════════════════════════════
+    // CALCUL DIRECT DES MASSES DES ANNEAUX D'EAU (en grammes)
+    // ═══════════════════════════════════════════════════════════════
+    
+    const G4double waterThickness = 5.0 * mm;
+    const G4double ringWidth = 5.0 * mm;
+    const G4double waterDensity = 1.0 * g/cm3;
+    const G4double pi = CLHEP::pi;
+    
+    G4cout << "\n=== MASSES DES ANNEAUX D'EAU ===" << G4endl;
+    LOG("=== MASSES DES ANNEAUX D'EAU ===");
+    
     for (G4int i = 0; i < DetectorConstruction::kNbWaterRings; ++i) {
-        fRingTotalEnergy[i] = 0.;
-        fRingTotalEnergy2[i] = 0.;
-        fRingEventCount[i] = 0;
+        G4double rInner = i * ringWidth;
+        G4double rOuter = (i + 1) * ringWidth;
+        
+        G4double volume = pi * (rOuter*rOuter - rInner*rInner) * waterThickness;
+        
+        fRingMasses[i] = (volume * waterDensity) / g;
+        
+        std::ostringstream oss;
+        oss << "  Anneau " << i 
+            << " : r=[" << rInner/mm << "-" << rOuter/mm << "] mm"
+            << " | V=" << std::fixed << std::setprecision(4) << volume/cm3 << " cm³"
+            << " | m=" << fRingMasses[i] << " g";
+        G4cout << oss.str() << G4endl;
+        LOG(oss.str());
     }
+    
+    G4double totalMass = 0.;
+    for (const auto& m : fRingMasses) totalMass += m;
+    
+    std::ostringstream ossTot;
+    ossTot << "  TOTAL : " << totalMass << " g";
+    G4cout << ossTot.str() << G4endl;
+    LOG(ossTot.str());
+    G4cout << "================================\n" << G4endl;
+    
+    // Réinitialiser les compteurs
+    fRingTotalEnergy.fill(0.);
+    fRingTotalEnergy2.fill(0.);
+    fRingEventCount.fill(0);
+    
+    for (auto& arr : fRingEnergyByLine) {
+        arr.fill(0.);
+    }
+    
+    fLineEmitted.fill(0);
+    fLineExitedFilter.fill(0);
+    fLineAbsorbedFilter.fill(0);
+    fLineEnteredWater.fill(0);
+    fLineAbsorbedWater.fill(0);
     
     fTotalPrimariesGenerated = 0;
     fTotalEventsWithZeroGamma = 0;
@@ -138,123 +151,274 @@ void RunAction::BeginOfRunAction(const G4Run* run)
     fTotalWaterEnergy = 0.;
     fTotalWaterEventCount = 0;
     
-    // Reset des compteurs de vérification
     fGammasEnteringFilter = 0;
     fGammasExitingFilter = 0;
     fGammasEnteringContainer = 0;
     fGammasEnteringWater = 0;
     fElectronsInWater = 0;
-    
-    // Reset des compteurs des plans de comptage
     fGammasPreFilterPlane = 0;
     fGammasPostFilterPlane = 0;
-    fGammasPreWaterPlane = 0;
-    fGammasPostWaterPlane = 0;
-
-    // Récupérer les masses des anneaux depuis DetectorConstruction
-    const DetectorConstruction* detector = 
-        static_cast<const DetectorConstruction*>(
-            G4RunManager::GetRunManager()->GetUserDetectorConstruction());
+    fGammasPreContainerPlane = 0;
+    fGammasPostContainerPlane = 0;
     
-    if (detector) {
-        for (G4int i = 0; i < DetectorConstruction::kNbWaterRings; ++i) {
-            fRingMasses[i] = detector->GetRingMass(i);
-        }
-    }
-
-    // Création des histogrammes et ntuples
+    // ═══════════════════════════════════════════════════════════════
+    // CONFIGURATION DE L'ANALYSIS MANAGER
+    // ═══════════════════════════════════════════════════════════════
+    
     auto analysisManager = G4AnalysisManager::Instance();
+    analysisManager->SetDefaultFileType("root");
+    analysisManager->SetVerboseLevel(1);
+    
     analysisManager->OpenFile(fOutputFileName);
-
-    // ═══════════════════════════════════════════════════════════════
-    // HISTOGRAMMES
-    // ═══════════════════════════════════════════════════════════════
-
-    // H0: Nombre de gammas primaires par événement
-    analysisManager->CreateH1("nGammasPerEvent",
-                              "Number of primary gammas per event;N_{#gamma};Counts",
-                              15, -0.5, 14.5);
-
-    // H1: Spectre des énergies générées
-    analysisManager->CreateH1("energySpectrum",
-                              "Energy spectrum of generated gammas;E (keV);Counts",
-                              1500, 0., 1500.);
-
-    // H2: Énergie totale par événement
-    analysisManager->CreateH1("totalEnergyPerEvent",
-                              "Total primary energy per event;E_{tot} (keV);Counts",
-                              500, 0., 5000.);
-
-    // H3-H7: Dose par anneau (un histogramme par anneau)
+    
+    // Histogrammes de dose en nGy
     for (G4int i = 0; i < DetectorConstruction::kNbWaterRings; ++i) {
-        G4String name = "doseRing" + std::to_string(i);
-        G4String title = "Energy deposit in ring " + std::to_string(i) + 
-                         " (r=" + std::to_string((int)(DetectorConstruction::GetRingInnerRadius(i)/mm)) +
-                         "-" + std::to_string((int)(DetectorConstruction::GetRingOuterRadius(i)/mm)) +
-                         " mm);E (keV);Counts";
-        analysisManager->CreateH1(name, title, 200, 0., 200.);
+        G4String name = "h_dose_ring" + std::to_string(i);
+        G4String title = "Dose par désintégration - Anneau " + std::to_string(i) + " [nGy]";
+        analysisManager->CreateH1(name, title, 200, 0., 0.5);  // Gamme ajustée 0-0.5 nGy
     }
-
-    // H8: Dose totale dans l'eau
-    analysisManager->CreateH1("doseTotalWater",
-                              "Total energy deposit in water;E (keV);Counts",
-                              500, 0., 500.);
-
+    
+    // Histogramme dose totale - CORRIGÉ: gamme ajustée pour la somme des anneaux
+    analysisManager->CreateH1("h_dose_total", "Dose totale par désintégration (somme anneaux) [nGy]", 200, 0., 0.5);
+    
+    for (G4int i = 0; i < EventAction::kNbGammaLines; ++i) {
+        G4String name = "h_edep_line" + std::to_string(i);
+        G4String title = "Énergie déposée - Raie " + EventAction::GetGammaLineName(i) + " [keV]";
+        analysisManager->CreateH1(name, title, 200, 0., 100.);
+    }
+    
     // ═══════════════════════════════════════════════════════════════
-    // NTUPLE 0: Données par événement
+    // NTUPLE 0 : doses
     // ═══════════════════════════════════════════════════════════════
-    analysisManager->CreateNtuple("EventData", "Event-level data");
-    analysisManager->CreateNtupleIColumn("eventID");
+    analysisManager->CreateNtuple("doses", "Doses par désintégration");
+    
+    for (G4int i = 0; i < DetectorConstruction::kNbWaterRings; ++i) {
+        G4String name = "dose_nGy_ring" + std::to_string(i);
+        analysisManager->CreateNtupleDColumn(name);
+    }
+    
+    analysisManager->CreateNtupleDColumn("dose_nGy_total");
+    analysisManager->CreateNtupleDColumn("edep_keV_total");
     analysisManager->CreateNtupleIColumn("nPrimaries");
-    analysisManager->CreateNtupleDColumn("totalEnergy");
     analysisManager->CreateNtupleIColumn("nTransmitted");
     analysisManager->CreateNtupleIColumn("nAbsorbed");
-    analysisManager->CreateNtupleIColumn("nScattered");
-    analysisManager->CreateNtupleIColumn("nSecondaries");
-    analysisManager->CreateNtupleDColumn("totalWaterDeposit");
+    
     analysisManager->FinishNtuple();
-
+    
     // ═══════════════════════════════════════════════════════════════
-    // NTUPLE 1: Données par gamma primaire
+    // NTUPLE 1 : gamma_lines
     // ═══════════════════════════════════════════════════════════════
-    analysisManager->CreateNtuple("GammaData", "Primary gamma data");
-    analysisManager->CreateNtupleIColumn("eventID");
-    analysisManager->CreateNtupleIColumn("gammaIndex");
-    analysisManager->CreateNtupleDColumn("energyInitial");
-    analysisManager->CreateNtupleDColumn("energyUpstream");
-    analysisManager->CreateNtupleDColumn("energyDownstream");
-    analysisManager->CreateNtupleDColumn("theta");
-    analysisManager->CreateNtupleDColumn("phi");
-    analysisManager->CreateNtupleIColumn("detectedUpstream");
-    analysisManager->CreateNtupleIColumn("detectedDownstream");
-    analysisManager->CreateNtupleIColumn("transmitted");
+    analysisManager->CreateNtuple("gamma_lines", "Statistiques par raie gamma");
+    analysisManager->CreateNtupleIColumn("lineIndex");
+    analysisManager->CreateNtupleDColumn("energy_keV");
+    analysisManager->CreateNtupleIColumn("emitted");
+    analysisManager->CreateNtupleIColumn("exitedFilter");
+    analysisManager->CreateNtupleIColumn("absorbedFilter");
+    analysisManager->CreateNtupleIColumn("enteredWater");
+    analysisManager->CreateNtupleIColumn("absorbedWater");
+    analysisManager->CreateNtupleDColumn("filterAbsRate");
+    analysisManager->CreateNtupleDColumn("waterAbsRate");
     analysisManager->FinishNtuple();
-
+    
     // ═══════════════════════════════════════════════════════════════
-    // NTUPLE 2: Dose par anneau (désintégration par désintégration)
+    // NTUPLE 2 : precontainer (particules vers eau, +z)
     // ═══════════════════════════════════════════════════════════════
-    analysisManager->CreateNtuple("RingDoseData", "Dose per ring per event");
-    analysisManager->CreateNtupleIColumn("eventID");
-    analysisManager->CreateNtupleIColumn("nPrimaries");
-    for (G4int i = 0; i < DetectorConstruction::kNbWaterRings; ++i) {
-        G4String colName = "doseRing" + std::to_string(i);
-        analysisManager->CreateNtupleDColumn(colName);
-    }
-    analysisManager->CreateNtupleDColumn("doseTotal");
+    analysisManager->CreateNtuple("precontainer", "Plan PreContainer - particules vers eau (+z)");
+    analysisManager->CreateNtupleIColumn("nPhotons");           // Nombre de photons vers eau
+    analysisManager->CreateNtupleDColumn("sumEPhotons_keV");    // Somme des énergies photons (keV)
+    analysisManager->CreateNtupleIColumn("nElectrons");         // Nombre d'électrons vers eau
+    analysisManager->CreateNtupleDColumn("sumEElectrons_keV");  // Somme des énergies électrons (keV)
     analysisManager->FinishNtuple();
-
-    G4cout << "\n╔════════════════════════════════════════════════════════════╗" << G4endl;
-    G4cout << "║  BeginOfRunAction: Histograms and Ntuples created          ║" << G4endl;
-    G4cout << "║  - H0: nGammasPerEvent                                     ║" << G4endl;
-    G4cout << "║  - H1: energySpectrum                                      ║" << G4endl;
-    G4cout << "║  - H2: totalEnergyPerEvent                                 ║" << G4endl;
-    G4cout << "║  - H3-H7: doseRing0 to doseRing4                           ║" << G4endl;
-    G4cout << "║  - H8: doseTotalWater                                      ║" << G4endl;
-    G4cout << "║  - Ntuple 0: EventData                                     ║" << G4endl;
-    G4cout << "║  - Ntuple 1: GammaData                                     ║" << G4endl;
-    G4cout << "║  - Ntuple 2: RingDoseData (dose par anneau)                ║" << G4endl;
-    G4cout << "╚════════════════════════════════════════════════════════════╝\n" << G4endl;
+    
+    // ═══════════════════════════════════════════════════════════════
+    // NTUPLE 3 : postcontainer (particules depuis et vers eau)
+    // ═══════════════════════════════════════════════════════════════
+    analysisManager->CreateNtuple("postcontainer", "Plan PostContainer - particules depuis/vers eau");
+    // Particules rétrodiffusées (depuis eau, -z)
+    analysisManager->CreateNtupleIColumn("nPhotons_back");           // Photons depuis eau (-z)
+    analysisManager->CreateNtupleDColumn("sumEPhotons_back_keV");    // Énergie photons (-z)
+    analysisManager->CreateNtupleIColumn("nElectrons_back");         // Électrons depuis eau (-z)
+    analysisManager->CreateNtupleDColumn("sumEElectrons_back_keV");  // Énergie électrons (-z)
+    // NOUVEAU : Particules transmises (vers eau, +z)
+    analysisManager->CreateNtupleIColumn("nPhotons_fwd");            // Photons vers eau (+z)
+    analysisManager->CreateNtupleDColumn("sumEPhotons_fwd_keV");     // Énergie photons (+z)
+    analysisManager->CreateNtupleIColumn("nElectrons_fwd");          // Électrons vers eau (+z)
+    analysisManager->CreateNtupleDColumn("sumEElectrons_fwd_keV");   // Énergie électrons (+z)
+    analysisManager->FinishNtuple();
 }
+
+void RunAction::EndOfRunAction(const G4Run* run)
+{
+    G4int nEvents = run->GetNumberOfEvent();
+    if (nEvents == 0) return;
+    
+    auto analysisManager = G4AnalysisManager::Instance();
+    
+    // Remplir le ntuple des raies gamma
+    for (G4int i = 0; i < EventAction::kNbGammaLines; ++i) {
+        analysisManager->FillNtupleIColumn(1, 0, i);
+        analysisManager->FillNtupleDColumn(1, 1, EventAction::GetGammaLineEnergy(i));
+        analysisManager->FillNtupleIColumn(1, 2, fLineEmitted[i]);
+        analysisManager->FillNtupleIColumn(1, 3, fLineExitedFilter[i]);
+        analysisManager->FillNtupleIColumn(1, 4, fLineAbsorbedFilter[i]);
+        analysisManager->FillNtupleIColumn(1, 5, fLineEnteredWater[i]);
+        analysisManager->FillNtupleIColumn(1, 6, fLineAbsorbedWater[i]);
+        analysisManager->FillNtupleDColumn(1, 7, GetLineFilterAbsorptionRate(i));
+        analysisManager->FillNtupleDColumn(1, 8, GetLineWaterAbsorptionRate(i));
+        analysisManager->AddNtupleRow(1);
+    }
+    
+    analysisManager->Write();
+    analysisManager->CloseFile();
+    
+    // Affichage des résultats (console + log)
+    PrintResults(nEvents);
+    PrintDoseTable();
+    PrintAbsorptionTable();
+    
+    Logger::GetInstance()->LogHeader("Fin du Run - Résultats");
+    Logger::GetInstance()->Close();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AFFICHAGE DES RÉSULTATS
+// ═══════════════════════════════════════════════════════════════
+
+void RunAction::PrintResults(G4int nEvents) const
+{
+    std::ostringstream oss;
+    
+    oss << "\n";
+    oss << "╔═══════════════════════════════════════════════════════════════════════════════╗\n";
+    oss << "║                           RÉSULTATS DU RUN                                    ║\n";
+    oss << "╠═══════════════════════════════════════════════════════════════════════════════╣\n";
+    oss << "║  Événements simulés: " << std::setw(10) << nEvents << "                                          ║\n";
+    oss << "║  Primaires générés:  " << std::setw(10) << fTotalPrimariesGenerated << "                                          ║\n";
+    oss << "║  Transmis:           " << std::setw(10) << fTotalTransmitted << "                                          ║\n";
+    oss << "║  Absorbés:           " << std::setw(10) << fTotalAbsorbed << "                                          ║\n";
+    oss << "╠═══════════════════════════════════════════════════════════════════════════════╣\n";
+    oss << "║  COMPTEURS DE PASSAGE (plans cylindriques) :                                  ║\n";
+    oss << "║    Pre-filtre:       " << std::setw(10) << fGammasPreFilterPlane << "                                          ║\n";
+    oss << "║    Post-filtre:      " << std::setw(10) << fGammasPostFilterPlane << "                                          ║\n";
+    oss << "║    Pre-container:    " << std::setw(10) << fGammasPreContainerPlane << "  (avant eau, air)                       ║\n";
+    oss << "║    Post-container:   " << std::setw(10) << fGammasPostContainerPlane << "  (après eau, W_PETG)                    ║\n";
+    oss << "╚═══════════════════════════════════════════════════════════════════════════════╝\n";
+    
+    G4cout << oss.str();
+    if (Logger::GetInstance()->IsOpen()) {
+        Logger::GetInstance()->GetStream() << oss.str();
+    }
+}
+
+void RunAction::PrintDoseTable() const
+{
+    std::ostringstream oss;
+    
+    oss << "\n";
+    oss << "╔═══════════════════════════════════════════════════════════════════════════════════════════════╗\n";
+    oss << "║                                  DOSES PAR ANNEAU (nGy)                                       ║\n";
+    oss << "╠══════════╦═══════════════╦═══════════════╦═══════════════╦═══════════════╦════════════════════╣\n";
+    oss << "║  Anneau  ║   Masse (g)   ║ E_dep (MeV)   ║  Dose (nGy)   ║ Dose/evt(nGy) ║  Événements        ║\n";
+    oss << "╠══════════╬═══════════════╬═══════════════╬═══════════════╬═══════════════╬════════════════════╣\n";
+    
+    G4double totalDose_nGy = 0.;  // CORRIGÉ: somme des doses par anneau
+    G4double totalMass = 0.;
+    G4int totalEvents = 0;
+    
+    for (G4int i = 0; i < DetectorConstruction::kNbWaterRings; ++i) {
+        G4double mass_g = fRingMasses[i];
+        G4double energy_MeV = fRingTotalEnergy[i] / MeV;
+        G4double dose_nGy = EnergyToNanoGray(energy_MeV, mass_g);
+        G4double dosePerEvt = (fRingEventCount[i] > 0) ? dose_nGy / fRingEventCount[i] : 0.;
+        
+        oss << "║    " << std::setw(2) << i << "    ║"
+            << std::setw(13) << std::fixed << std::setprecision(4) << mass_g << "  ║"
+            << std::setw(13) << std::scientific << std::setprecision(3) << energy_MeV << "  ║"
+            << std::setw(13) << std::scientific << std::setprecision(3) << dose_nGy << "  ║"
+            << std::setw(13) << std::scientific << std::setprecision(3) << dosePerEvt << "  ║"
+            << std::setw(18) << std::fixed << std::setprecision(0) << fRingEventCount[i] << "  ║\n";
+        
+        totalDose_nGy += dose_nGy;  // CORRIGÉ: somme des doses
+        totalMass += mass_g;
+        totalEvents = std::max(totalEvents, fRingEventCount[i]);
+    }
+    
+    G4double totalDosePerEvt = (fTotalEvents > 0) ? totalDose_nGy / fTotalEvents : 0.;
+    
+    oss << "╠══════════╬═══════════════╬═══════════════╬═══════════════╬═══════════════╬════════════════════╣\n";
+    oss << "║  TOTAL   ║"
+        << std::setw(13) << std::fixed << std::setprecision(4) << totalMass << "  ║"
+        << std::setw(13) << std::scientific << std::setprecision(3) << fTotalWaterEnergy/MeV << "  ║"
+        << std::setw(13) << std::scientific << std::setprecision(3) << totalDose_nGy << "  ║"
+        << std::setw(13) << std::scientific << std::setprecision(3) << totalDosePerEvt << "  ║"
+        << std::setw(18) << std::fixed << std::setprecision(0) << fTotalEvents << "  ║\n";
+    oss << "╚══════════╩═══════════════╩═══════════════╩═══════════════╩═══════════════╩════════════════════╝\n";
+    
+    G4cout << oss.str();
+    if (Logger::GetInstance()->IsOpen()) {
+        Logger::GetInstance()->GetStream() << oss.str();
+    }
+}
+
+void RunAction::PrintAbsorptionTable() const
+{
+    std::ostringstream oss;
+    
+    oss << "\n";
+    oss << "╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗\n";
+    oss << "║                                    TAUX D'ABSORPTION PAR RAIE GAMMA Eu-152                                         ║\n";
+    oss << "╠═══════════════╦═══════════╦═══════════════╦═══════════════╦═══════════════╦═══════════════╦═══════════════════════════╣\n";
+    oss << "║     Raie      ║   Émis    ║ Sortis filtre ║  Abs. filtre  ║ Entrés eau    ║   Abs. eau    ║  Taux abs. filtre/eau (%) ║\n";
+    oss << "╠═══════════════╬═══════════╬═══════════════╬═══════════════╬═══════════════╬═══════════════╬═══════════════════════════╣\n";
+    
+    for (G4int i = 0; i < EventAction::kNbGammaLines; ++i) {
+        G4double filterRate = GetLineFilterAbsorptionRate(i);
+        G4double waterRate = GetLineWaterAbsorptionRate(i);
+        
+        oss << "║ " << std::setw(13) << std::left << EventAction::GetGammaLineName(i) << " ║"
+            << std::setw(10) << std::right << fLineEmitted[i] << " ║"
+            << std::setw(14) << fLineExitedFilter[i] << " ║"
+            << std::setw(14) << fLineAbsorbedFilter[i] << " ║"
+            << std::setw(14) << fLineEnteredWater[i] << " ║"
+            << std::setw(14) << fLineAbsorbedWater[i] << " ║"
+            << std::setw(11) << std::fixed << std::setprecision(2) << filterRate << " / "
+            << std::setw(10) << std::fixed << std::setprecision(2) << waterRate << " ║\n";
+    }
+    
+    G4int totalEmitted = 0, totalExited = 0, totalAbsFilter = 0;
+    G4int totalEntered = 0, totalAbsWater = 0;
+    
+    for (G4int i = 0; i < EventAction::kNbGammaLines; ++i) {
+        totalEmitted += fLineEmitted[i];
+        totalExited += fLineExitedFilter[i];
+        totalAbsFilter += fLineAbsorbedFilter[i];
+        totalEntered += fLineEnteredWater[i];
+        totalAbsWater += fLineAbsorbedWater[i];
+    }
+    
+    G4double totalFilterRate = (totalEmitted > 0) ? 100. * totalAbsFilter / totalEmitted : 0.;
+    G4double totalWaterRate = (totalEntered > 0) ? 100. * totalAbsWater / totalEntered : 0.;
+    
+    oss << "╠═══════════════╬═══════════╬═══════════════╬═══════════════╬═══════════════╬═══════════════╬═══════════════════════════╣\n";
+    oss << "║     TOTAL     ║"
+        << std::setw(10) << totalEmitted << " ║"
+        << std::setw(14) << totalExited << " ║"
+        << std::setw(14) << totalAbsFilter << " ║"
+        << std::setw(14) << totalEntered << " ║"
+        << std::setw(14) << totalAbsWater << " ║"
+        << std::setw(11) << std::fixed << std::setprecision(2) << totalFilterRate << " / "
+        << std::setw(10) << std::fixed << std::setprecision(2) << totalWaterRate << " ║\n";
+    oss << "╚═══════════════╩═══════════════╩═══════════════╩═══════════════╩═══════════════╩═══════════════╩═══════════════════════════╝\n";
+    
+    G4cout << oss.str();
+    if (Logger::GetInstance()->IsOpen()) {
+        Logger::GetInstance()->GetStream() << oss.str();
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ACCUMULATION DES DONNÉES
+// ═══════════════════════════════════════════════════════════════
 
 void RunAction::AddRingEnergy(G4int ringIndex, G4double edep)
 {
@@ -263,20 +427,33 @@ void RunAction::AddRingEnergy(G4int ringIndex, G4double edep)
         fRingTotalEnergy2[ringIndex] += edep * edep;
         fRingEventCount[ringIndex]++;
         
-        // Remplir l'histogramme correspondant (H3 à H7)
+        fTotalWaterEnergy += edep;
+        fTotalWaterEventCount++;
+        
+        // Remplir l'histogramme de dose par anneau
         auto analysisManager = G4AnalysisManager::Instance();
-        analysisManager->FillH1(3 + ringIndex, edep/keV);
+        G4double dose_nGy = EnergyToNanoGray(edep / MeV, fRingMasses[ringIndex]);
+        analysisManager->FillH1(ringIndex, dose_nGy);
     }
-    
-    // Accumuler aussi le total
-    fTotalWaterEnergy += edep;
+}
+
+void RunAction::AddRingEnergyByLine(G4int ringIndex, G4int lineIndex, G4double edep)
+{
+    if (ringIndex >= 0 && ringIndex < DetectorConstruction::kNbWaterRings &&
+        lineIndex >= 0 && lineIndex < EventAction::kNbGammaLines) {
+        fRingEnergyByLine[ringIndex][lineIndex] += edep;
+        
+        auto analysisManager = G4AnalysisManager::Instance();
+        analysisManager->FillH1(6 + lineIndex, edep / keV);
+    }
 }
 
 void RunAction::RecordEventStatistics(G4int nPrimaries, 
-                                       const std::vector<G4double>& primaryEnergies,
-                                       G4int nTransmitted,
-                                       G4int nAbsorbed,
-                                       G4double totalDeposit)
+                                      const std::vector<G4double>& primaryEnergies,
+                                      G4int nTransmitted,
+                                      G4int nAbsorbed,
+                                      G4double totalDeposit,
+                                      const std::array<G4double, 5>& ringEnergies)
 {
     fTotalEvents++;
     fTotalPrimariesGenerated += nPrimaries;
@@ -287,352 +464,147 @@ void RunAction::RecordEventStatistics(G4int nPrimaries,
         fTotalEventsWithZeroGamma++;
     }
     
-    if (totalDeposit > 0.) {
-        fTotalWaterEventCount++;
-    }
-
     auto analysisManager = G4AnalysisManager::Instance();
-
-    // Remplir les histogrammes
-    analysisManager->FillH1(0, nPrimaries);
     
-    G4double totalEnergy = 0.;
-    for (const auto& e : primaryEnergies) {
-        analysisManager->FillH1(1, e/keV);
-        totalEnergy += e;
+    // ═══════════════════════════════════════════════════════════════
+    // CORRECTION: Calculer la dose totale comme SOMME des doses par anneau
+    // (et non pas comme totalDeposit / totalMass)
+    // ═══════════════════════════════════════════════════════════════
+    
+    G4double totalDose_nGy = 0.;
+    for (G4int i = 0; i < DetectorConstruction::kNbWaterRings; ++i) {
+        G4double dose_nGy = EnergyToNanoGray(ringEnergies[i] / MeV, fRingMasses[i]);
+        analysisManager->FillNtupleDColumn(0, i, dose_nGy);
+        totalDose_nGy += dose_nGy;  // Somme des doses par anneau
     }
     
-    analysisManager->FillH1(2, totalEnergy/keV);
+    // CORRIGÉ: Utiliser totalDose_nGy (somme des doses) au lieu de eventDose_nGy
+    analysisManager->FillNtupleDColumn(0, DetectorConstruction::kNbWaterRings, totalDose_nGy);
+    analysisManager->FillNtupleDColumn(0, DetectorConstruction::kNbWaterRings + 1, totalDeposit / keV);
+    analysisManager->FillNtupleIColumn(0, DetectorConstruction::kNbWaterRings + 2, nPrimaries);
+    analysisManager->FillNtupleIColumn(0, DetectorConstruction::kNbWaterRings + 3, nTransmitted);
+    analysisManager->FillNtupleIColumn(0, DetectorConstruction::kNbWaterRings + 4, nAbsorbed);
+    analysisManager->AddNtupleRow(0);
     
-    // Dose totale dans l'eau (H8)
+    // CORRIGÉ: Remplir l'histogramme de dose totale avec la somme des doses
     if (totalDeposit > 0.) {
-        analysisManager->FillH1(3 + DetectorConstruction::kNbWaterRings, totalDeposit/keV);
+        analysisManager->FillH1(5, totalDose_nGy);
     }
 }
 
-void RunAction::EndOfRunAction(const G4Run* run)
+void RunAction::RecordContainerPlaneStatistics(
+    G4int preNPhotons, G4double preSumEPhotons,
+    G4int preNElectrons, G4double preSumEElectrons,
+    G4int postNPhotonsBack, G4double postSumEPhotonsBack,
+    G4int postNElectronsBack, G4double postSumEElectronsBack,
+    G4int postNPhotonsFwd, G4double postSumEPhotonsFwd,
+    G4int postNElectronsFwd, G4double postSumEElectronsFwd)
 {
-    G4int nofEvents = run->GetNumberOfEvent();
-    if (nofEvents == 0) return;
-
-    // Fermer le fichier d'analyse
     auto analysisManager = G4AnalysisManager::Instance();
-    analysisManager->Write();
-    analysisManager->CloseFile();
+    
+    // Ntuple 2 : precontainer
+    analysisManager->FillNtupleIColumn(2, 0, preNPhotons);
+    analysisManager->FillNtupleDColumn(2, 1, preSumEPhotons / keV);
+    analysisManager->FillNtupleIColumn(2, 2, preNElectrons);
+    analysisManager->FillNtupleDColumn(2, 3, preSumEElectrons / keV);
+    analysisManager->AddNtupleRow(2);
+    
+    // Ntuple 3 : postcontainer
+    analysisManager->FillNtupleIColumn(3, 0, postNPhotonsBack);
+    analysisManager->FillNtupleDColumn(3, 1, postSumEPhotonsBack / keV);
+    analysisManager->FillNtupleIColumn(3, 2, postNElectronsBack);
+    analysisManager->FillNtupleDColumn(3, 3, postSumEElectronsBack / keV);
+    analysisManager->FillNtupleIColumn(3, 4, postNPhotonsFwd);
+    analysisManager->FillNtupleDColumn(3, 5, postSumEPhotonsFwd / keV);
+    analysisManager->FillNtupleIColumn(3, 6, postNElectronsFwd);
+    analysisManager->FillNtupleDColumn(3, 7, postSumEElectronsFwd / keV);
+    analysisManager->AddNtupleRow(3);
+}
 
-    // ═══════════════════════════════════════════════════════════════
-    // CALCULS STATISTIQUES
-    // ═══════════════════════════════════════════════════════════════
+void RunAction::RecordGammaLineStatistics(G4int lineIndex,
+                                          G4bool exitedFilter,
+                                          G4bool absorbedInFilter,
+                                          G4bool enteredWater,
+                                          G4bool absorbedInWater)
+{
+    if (lineIndex < 0 || lineIndex >= EventAction::kNbGammaLines) return;
     
-    G4double meanGammasPerEvent = (G4double)fTotalPrimariesGenerated / (G4double)nofEvents;
-    G4double fractionZeroGamma = 100.0 * (G4double)fTotalEventsWithZeroGamma / (G4double)nofEvents;
-    G4double transmissionRate = (fTotalPrimariesGenerated > 0) ?
-        100.0 * fTotalTransmitted / fTotalPrimariesGenerated : 0.;
-    G4double absorptionRate = (fTotalPrimariesGenerated > 0) ?
-        100.0 * fTotalAbsorbed / fTotalPrimariesGenerated : 0.;
+    fLineEmitted[lineIndex]++;
+    
+    if (exitedFilter) fLineExitedFilter[lineIndex]++;
+    if (absorbedInFilter) fLineAbsorbedFilter[lineIndex]++;
+    if (enteredWater) fLineEnteredWater[lineIndex]++;
+    if (absorbedInWater) fLineAbsorbedWater[lineIndex]++;
+}
 
-    // ═══════════════════════════════════════════════════════════════
-    // RENORMALISATION SPATIALE ET TEMPORELLE
-    // ═══════════════════════════════════════════════════════════════
-    
-    // Fraction d'angle solide du cône
-    G4double solidAngleFraction = GetSolidAngleFraction();
-    G4double solidAngle_sr = 2.0 * M_PI * (1.0 - std::cos(fConeAngle));
-    
-    // Nombre équivalent de désintégrations sur 4π
-    G4double N_4pi = (G4double)nofEvents / solidAngleFraction;
-    
-    // Temps d'irradiation équivalent
-    G4double simulatedTime_s = CalculateIrradiationTime(nofEvents);
-    G4double simulatedTime_min = simulatedTime_s / 60.0;
-    G4double simulatedTime_h = simulatedTime_s / 3600.0;
-    
-    // Temps par événement simulé
-    G4double timePerEvent_ms = (nofEvents > 0) ? simulatedTime_s * 1000.0 / nofEvents : 0.;
+// ═══════════════════════════════════════════════════════════════
+// ACCESSEURS POUR LES STATISTIQUES PAR RAIE
+// ═══════════════════════════════════════════════════════════════
 
-    // ═══════════════════════════════════════════════════════════════
-    // AFFICHAGE DU RÉSUMÉ
-    // ═══════════════════════════════════════════════════════════════
-    
-    G4cout << "\n";
-    G4cout << "╔═══════════════════════════════════════════════════════════════════╗\n";
-    G4cout << "║                    RUN SUMMARY - PUITS COURONNE                   ║\n";
-    G4cout << "║              Dose par anneau dans le détecteur eau                ║\n";
-    G4cout << "╠═══════════════════════════════════════════════════════════════════╣\n";
-    G4cout << "║  Number of events processed: " << nofEvents << G4endl;
-    G4cout << "╠═══════════════════════════════════════════════════════════════════╣\n";
-    G4cout << "║  PRIMARY GAMMA GENERATION STATISTICS:                             ║\n";
-    G4cout << "║    Total gammas generated     : " << fTotalPrimariesGenerated << G4endl;
-    G4cout << "║    Mean gammas per event      : " << meanGammasPerEvent << G4endl;
-    G4cout << "║    Expected (theory)          : 1.924" << G4endl;
-    G4cout << "║    Events with 0 gamma        : " << fTotalEventsWithZeroGamma
-           << " (" << fractionZeroGamma << "%)" << G4endl;
-    G4cout << "╠═══════════════════════════════════════════════════════════════════╣\n";
-    G4cout << "║  TRANSMISSION THROUGH FILTER:                                     ║\n";
-    G4cout << "║    Gammas transmitted         : " << fTotalTransmitted
-           << " (" << transmissionRate << "%)" << G4endl;
-    G4cout << "║    Gammas absorbed            : " << fTotalAbsorbed
-           << " (" << absorptionRate << "%)" << G4endl;
-    G4cout << "╠═══════════════════════════════════════════════════════════════════╣\n";
-    G4cout << "║  ★ COMPTEURS DE VÉRIFICATION (passage dans les volumes):          ║\n";
-    G4cout << "║    Gammas entrant dans filtre   : " << fGammasEnteringFilter << G4endl;
-    G4cout << "║    Gammas sortant du filtre     : " << fGammasExitingFilter << G4endl;
-    G4cout << "║    Gammas entrant dans container: " << fGammasEnteringContainer << G4endl;
-    G4cout << "║    Gammas entrant dans l'eau    : " << fGammasEnteringWater << G4endl;
-    G4cout << "║    Électrons créés dans l'eau   : " << fElectronsInWater << G4endl;
-    if (fGammasEnteringFilter > 0) {
-        G4double filterTransmission = 100.0 * fGammasExitingFilter / fGammasEnteringFilter;
-        G4cout << "║    Transmission filtre          : " << filterTransmission << "%" << G4endl;
+G4int RunAction::GetLineEmitted(G4int lineIndex) const
+{
+    if (lineIndex >= 0 && lineIndex < EventAction::kNbGammaLines) {
+        return fLineEmitted[lineIndex];
     }
-    if (fGammasExitingFilter > 0) {
-        G4double waterReach = 100.0 * fGammasEnteringWater / fGammasExitingFilter;
-        G4cout << "║    Gammas atteignant l'eau      : " << waterReach << "%" << G4endl;
+    return 0;
+}
+
+G4int RunAction::GetLineAbsorbedFilter(G4int lineIndex) const
+{
+    if (lineIndex >= 0 && lineIndex < EventAction::kNbGammaLines) {
+        return fLineAbsorbedFilter[lineIndex];
     }
-    G4cout << "╠═══════════════════════════════════════════════════════════════════╣\n";
-    G4cout << "║  ★ PLANS DE COMPTAGE CYLINDRIQUES :                               ║\n";
-    G4cout << "║    Plan pré-filtre              : " << fGammasPreFilterPlane << " gammas" << G4endl;
-    G4cout << "║    Plan post-filtre             : " << fGammasPostFilterPlane << " gammas" << G4endl;
-    G4cout << "║    Plan pré-eau                 : " << fGammasPreWaterPlane << " gammas" << G4endl;
-    G4cout << "║    Plan post-eau                : " << fGammasPostWaterPlane << " gammas" << G4endl;
-    if (fGammasPreFilterPlane > 0) {
-        G4double transFilter = 100.0 * fGammasPostFilterPlane / fGammasPreFilterPlane;
-        G4cout << "║    Transmission filtre (plans)  : " << transFilter << "%" << G4endl;
+    return 0;
+}
+
+G4int RunAction::GetLineAbsorbedWater(G4int lineIndex) const
+{
+    if (lineIndex >= 0 && lineIndex < EventAction::kNbGammaLines) {
+        return fLineAbsorbedWater[lineIndex];
     }
-    if (fGammasPreWaterPlane > 0) {
-        G4double transWater = 100.0 * fGammasPostWaterPlane / fGammasPreWaterPlane;
-        G4cout << "║    Transmission eau (plans)     : " << transWater << "%" << G4endl;
+    return 0;
+}
+
+G4double RunAction::GetLineFilterAbsorptionRate(G4int lineIndex) const
+{
+    if (lineIndex >= 0 && lineIndex < EventAction::kNbGammaLines) {
+        if (fLineEmitted[lineIndex] > 0) {
+            return static_cast<G4double>(fLineAbsorbedFilter[lineIndex]) / 
+                   static_cast<G4double>(fLineEmitted[lineIndex]) * 100.;
+        }
     }
-    
-    // ═══════════════════════════════════════════════════════════════
-    // SECTION RENORMALISATION SPATIALE ET TEMPORELLE
-    // ═══════════════════════════════════════════════════════════════
-    G4cout << "╠═══════════════════════════════════════════════════════════════════╣\n";
-    G4cout << "║  ★★★ RENORMALISATION SPATIALE ET TEMPORELLE ★★★                   ║\n";
-    G4cout << "╟───────────────────────────────────────────────────────────────────╢\n";
-    G4cout << "║  Paramètres de la source :                                        ║\n";
-    G4cout << "║    Activité (4π)              : " << fActivity4pi/1000.0 << " kBq" << G4endl;
-    G4cout << "║    Gammas moyens/désint.      : " << fMeanGammasPerDecay << G4endl;
-    G4cout << "╟───────────────────────────────────────────────────────────────────╢\n";
-    G4cout << "║  Cône d'émission simulé :                                         ║\n";
-    G4cout << "║    Demi-angle θ               : " << fConeAngle/deg << "°" << G4endl;
-    G4cout << "║    Angle solide Ω             : " << solidAngle_sr << " sr" << G4endl;
-    G4cout << "║    Fraction de 4π (f)         : " << solidAngleFraction 
-           << " (" << solidAngleFraction*100.0 << "%)" << G4endl;
-    G4cout << "╟───────────────────────────────────────────────────────────────────╢\n";
-    G4cout << "║  Conversion événements → temps :                                  ║\n";
-    G4cout << "║    N_sim (événements)         : " << nofEvents << G4endl;
-    G4cout << "║    N_4π équivalent            : " << (G4long)N_4pi << " désintégrations" << G4endl;
-    G4cout << "║    Formule : T = N_sim / (f × A)                                  ║\n";
-    G4cout << "╟───────────────────────────────────────────────────────────────────╢\n";
-    G4cout << "║  ══► TEMPS D'IRRADIATION ÉQUIVALENT :                             ║\n";
-    G4cout << "║                                                                   ║\n";
-    if (simulatedTime_s < 60.0) {
-        G4cout << "║         T_irr = " << simulatedTime_s << " secondes                      ║\n";
-    } else if (simulatedTime_s < 3600.0) {
-        G4cout << "║         T_irr = " << simulatedTime_s << " s = " << simulatedTime_min << " min        ║\n";
-    } else {
-        G4cout << "║         T_irr = " << simulatedTime_s << " s = " << simulatedTime_h << " h          ║\n";
+    return 0.;
+}
+
+G4double RunAction::GetLineWaterAbsorptionRate(G4int lineIndex) const
+{
+    if (lineIndex >= 0 && lineIndex < EventAction::kNbGammaLines) {
+        if (fLineEnteredWater[lineIndex] > 0) {
+            return static_cast<G4double>(fLineAbsorbedWater[lineIndex]) / 
+                   static_cast<G4double>(fLineEnteredWater[lineIndex]) * 100.;
+        }
     }
-    G4cout << "║                                                                   ║\n";
-    G4cout << "║    (soit " << timePerEvent_ms << " ms par événement simulé)                  ║\n";
-    G4cout << "╠═══════════════════════════════════════════════════════════════════╣\n";
-    G4cout << "║  DOSE DANS LES ANNEAUX D'EAU:                                     ║\n";
-    G4cout << "╟───────────────────────────────────────────────────────────────────╢\n";
-    
-    G4double totalMass = 0.;
-    G4double totalDose_Gy = 0.;
-    
-    for (G4int i = 0; i < DetectorConstruction::kNbWaterRings; ++i) {
-        G4double rIn = DetectorConstruction::GetRingInnerRadius(i);
-        G4double rOut = DetectorConstruction::GetRingOuterRadius(i);
-        
-        // Dose en Gray
-        G4double dose_Gy = 0.;
-        if (fRingMasses[i] > 0.) {
-            dose_Gy = (fRingTotalEnergy[i] / fRingMasses[i]) / gray;
-        }
-        
-        // Débit de dose en nGy/h
-        G4double doseRate_nGyPerH = 0.;
-        if (simulatedTime_s > 0.) {
-            doseRate_nGyPerH = dose_Gy / simulatedTime_s * 3600.0 * 1.0e9;
-        }
-        
-        // Erreur statistique
-        G4double convergence = (fRingEventCount[i] > 0) ?
-            100.0 / std::sqrt((G4double)fRingEventCount[i]) : 0.;
-        G4double doseRateError = doseRate_nGyPerH * convergence / 100.;
-        
-        totalMass += fRingMasses[i];
-        totalDose_Gy += dose_Gy * fRingMasses[i];  // Pondéré par la masse
-        
-        G4cout << "║  Anneau " << i << " (r=" << rIn/mm << "-" << rOut/mm << " mm):" << G4endl;
-        G4cout << "║    Masse                    : " << fRingMasses[i]/g << " g" << G4endl;
-        G4cout << "║    Énergie déposée          : " << fRingTotalEnergy[i]/keV << " keV" << G4endl;
-        G4cout << "║    Événements avec dépôt    : " << fRingEventCount[i] << G4endl;
-        G4cout << "║    Dose                     : " << dose_Gy*1e9 << " nGy" << G4endl;
-        G4cout << "║    Débit de dose            : " << doseRate_nGyPerH << " ± " 
-               << doseRateError << " nGy/h (" << convergence << "%)" << G4endl;
-        G4cout << "╟───────────────────────────────────────────────────────────────────╢\n";
+    return 0.;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CALCULS DE NORMALISATION
+// ═══════════════════════════════════════════════════════════════
+
+G4double RunAction::CalculateIrradiationTime(G4int nEvents) const
+{
+    G4double activityInCone = fActivity4pi * GetSolidAngleFraction();
+    if (activityInCone > 0.) {
+        return static_cast<G4double>(nEvents) / activityInCone;
     }
-    
-    // Dose totale moyenne (pondérée par masse)
-    G4double avgDose_Gy = (totalMass > 0.) ? totalDose_Gy / totalMass : 0.;
-    G4double totalDoseRate_nGyPerH = (simulatedTime_s > 0.) ? 
-        avgDose_Gy / simulatedTime_s * 3600.0 * 1.0e9 : 0.;
-    G4double totalConvergence = (fTotalWaterEventCount > 0) ?
-        100.0 / std::sqrt((G4double)fTotalWaterEventCount) : 0.;
-    
-    G4cout << "║  TOTAL EAU:                                                       ║\n";
-    G4cout << "║    Masse totale             : " << totalMass/g << " g" << G4endl;
-    G4cout << "║    Énergie totale déposée   : " << fTotalWaterEnergy/keV << " keV" << G4endl;
-    G4cout << "║    Événements avec dépôt    : " << fTotalWaterEventCount << G4endl;
-    G4cout << "║    Dose moyenne             : " << avgDose_Gy*1e9 << " nGy" << G4endl;
-    G4cout << "║    Débit de dose moyen      : " << totalDoseRate_nGyPerH << " nGy/h ("
-           << totalConvergence << "%)" << G4endl;
-    G4cout << "╠═══════════════════════════════════════════════════════════════════╣\n";
-    G4cout << "║  OUTPUT FILE: " << fOutputFileName << ".root" << G4endl;
-    G4cout << "║  Contains:                                                        ║\n";
-    G4cout << "║    - RingDoseData ntuple: dose par anneau par désintégration      ║\n";
-    G4cout << "║    - Histograms: doseRing0 to doseRing4                           ║\n";
-    G4cout << "╚═══════════════════════════════════════════════════════════════════╝\n";
-    G4cout << G4endl;
-    
-    // ═══════════════════════════════════════════════════════════════
-    // ÉCRITURE DU RÉSUMÉ DANS LE FICHIER LOG
-    // ═══════════════════════════════════════════════════════════════
-    Logger* log = Logger::GetInstance();
-    if (log->IsOpen()) {
-        log->LogHeader("RUN SUMMARY");
-        
-        std::stringstream ss;
-        ss << "Number of events: " << nofEvents;
-        log->LogLine(ss.str());
-        
-        ss.str(""); ss << "Total gammas generated: " << fTotalPrimariesGenerated;
-        log->LogLine(ss.str());
-        
-        ss.str(""); ss << "Mean gammas/event: " << meanGammasPerEvent;
-        log->LogLine(ss.str());
-        
-        ss.str(""); ss << "Events with 0 gamma: " << fTotalEventsWithZeroGamma 
-                       << " (" << fractionZeroGamma << "%)";
-        log->LogLine(ss.str());
-        
-        log->LogLine("");
-        log->LogLine("=== COMPTEURS DE VERIFICATION ===");
-        
-        ss.str(""); ss << "Gammas entrant filtre: " << fGammasEnteringFilter;
-        log->LogLine(ss.str());
-        
-        ss.str(""); ss << "Gammas sortant filtre: " << fGammasExitingFilter;
-        log->LogLine(ss.str());
-        
-        ss.str(""); ss << "Gammas entrant container: " << fGammasEnteringContainer;
-        log->LogLine(ss.str());
-        
-        ss.str(""); ss << "Gammas entrant eau: " << fGammasEnteringWater;
-        log->LogLine(ss.str());
-        
-        ss.str(""); ss << "Electrons dans eau: " << fElectronsInWater;
-        log->LogLine(ss.str());
-        
-        if (fGammasEnteringFilter > 0) {
-            G4double filterTrans = 100.0 * fGammasExitingFilter / fGammasEnteringFilter;
-            ss.str(""); ss << "Transmission filtre: " << filterTrans << "%";
-            log->LogLine(ss.str());
-        }
-        
-        log->LogLine("");
-        log->LogLine("=== PLANS DE COMPTAGE CYLINDRIQUES ===");
-        
-        ss.str(""); ss << "Plan pré-filtre: " << fGammasPreFilterPlane << " gammas";
-        log->LogLine(ss.str());
-        
-        ss.str(""); ss << "Plan post-filtre: " << fGammasPostFilterPlane << " gammas";
-        log->LogLine(ss.str());
-        
-        ss.str(""); ss << "Plan pré-eau: " << fGammasPreWaterPlane << " gammas";
-        log->LogLine(ss.str());
-        
-        ss.str(""); ss << "Plan post-eau: " << fGammasPostWaterPlane << " gammas";
-        log->LogLine(ss.str());
-        
-        if (fGammasPreFilterPlane > 0) {
-            G4double transFilter = 100.0 * fGammasPostFilterPlane / fGammasPreFilterPlane;
-            ss.str(""); ss << "Transmission filtre (plans): " << transFilter << "%";
-            log->LogLine(ss.str());
-        }
-        if (fGammasPreWaterPlane > 0) {
-            G4double transWater = 100.0 * fGammasPostWaterPlane / fGammasPreWaterPlane;
-            ss.str(""); ss << "Transmission eau (plans): " << transWater << "%";
-            log->LogLine(ss.str());
-        }
-        
-        log->LogLine("");
-        log->LogLine("=== DOSE PAR ANNEAU ===");
-        
-        for (G4int i = 0; i < DetectorConstruction::kNbWaterRings; ++i) {
-            G4double rIn = DetectorConstruction::GetRingInnerRadius(i);
-            G4double rOut = DetectorConstruction::GetRingOuterRadius(i);
-            G4double dose_Gy = (fRingMasses[i] > 0.) ? 
-                (fRingTotalEnergy[i] / fRingMasses[i]) / gray : 0.;
-            G4double doseRate = (simulatedTime_s > 0.) ? 
-                dose_Gy / simulatedTime_s * 3600.0 * 1.0e9 : 0.;
-            
-            ss.str(""); 
-            ss << "Ring " << i << " (r=" << rIn/mm << "-" << rOut/mm << " mm): "
-               << fRingTotalEnergy[i]/keV << " keV, "
-               << fRingEventCount[i] << " events, "
-               << doseRate << " nGy/h";
-            log->LogLine(ss.str());
-        }
-        
-        log->LogLine("");
-        ss.str(""); ss << "TOTAL: " << fTotalWaterEnergy/keV << " keV, "
-                       << totalDoseRate_nGyPerH << " nGy/h";
-        log->LogLine(ss.str());
-        
-        log->LogLine("");
-        log->LogLine("=== RENORMALISATION SPATIALE ET TEMPORELLE ===");
-        
-        ss.str(""); ss << "Activité source (4π): " << fActivity4pi/1000.0 << " kBq";
-        log->LogLine(ss.str());
-        
-        ss.str(""); ss << "Demi-angle du cône: " << fConeAngle/deg << " deg";
-        log->LogLine(ss.str());
-        
-        ss.str(""); ss << "Fraction angle solide (f): " << solidAngleFraction 
-                       << " (" << solidAngleFraction*100.0 << "%)";
-        log->LogLine(ss.str());
-        
-        ss.str(""); ss << "Événements simulés (N_sim): " << nofEvents;
-        log->LogLine(ss.str());
-        
-        ss.str(""); ss << "Désintégrations 4π équivalentes: " << (G4long)N_4pi;
-        log->LogLine(ss.str());
-        
-        log->LogLine("");
-        ss.str(""); ss << ">>> TEMPS D'IRRADIATION EQUIVALENT: " << simulatedTime_s << " s";
-        log->LogLine(ss.str());
-        
-        if (simulatedTime_s >= 60.0) {
-            ss.str(""); ss << "    = " << simulatedTime_min << " min";
-            log->LogLine(ss.str());
-        }
-        if (simulatedTime_s >= 3600.0) {
-            ss.str(""); ss << "    = " << simulatedTime_h << " h";
-            log->LogLine(ss.str());
-        }
-        
-        ss.str(""); ss << "    (" << timePerEvent_ms << " ms par événement)";
-        log->LogLine(ss.str());
-        
-        log->LogLine("");
-        ss.str(""); ss << "Output ROOT file: " << fOutputFileName << ".root";
-        log->LogLine(ss.str());
-        
-        // Fermer le log
-        log->Close();
+    return 0.;
+}
+
+G4double RunAction::CalculateDoseRate(G4double totalDose_Gy, G4int nEvents) const
+{
+    G4double time = CalculateIrradiationTime(nEvents);
+    if (time > 0.) {
+        return totalDose_Gy / time;
     }
+    return 0.;
 }

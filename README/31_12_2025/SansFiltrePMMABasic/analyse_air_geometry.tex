@@ -1,0 +1,348 @@
+\documentclass[11pt,a4paper]{article}
+
+% ═══════════════════════════════════════════════════════════════
+% PACKAGES
+% ═══════════════════════════════════════════════════════════════
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french, provide=*]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage{xcolor}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage{float}
+
+% ═══════════════════════════════════════════════════════════════
+% CONFIGURATION
+% ═══════════════════════════════════════════════════════════════
+\geometry{margin=2.5cm}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!70!black,
+    urlcolor=blue!70!black
+}
+
+\sisetup{
+    locale = FR,
+    per-mode = symbol,
+    separate-uncertainty = true
+}
+
+% En-tête et pied de page
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Simulation Geant4 -- Géométrie Air}
+\fancyhead[R]{\small \today}
+\fancyfoot[C]{\thepage}
+
+% Couleurs personnalisées
+\definecolor{precontainer}{RGB}{255,165,0}
+\definecolor{postcontainer}{RGB}{0,139,139}
+\definecolor{backscatter}{RGB}{148,0,211}
+
+% ═══════════════════════════════════════════════════════════════
+% DOCUMENT
+% ═══════════════════════════════════════════════════════════════
+\begin{document}
+
+% ───────────────────────────────────────────────────────────────
+% TITRE
+% ───────────────────────────────────────────────────────────────
+\begin{center}
+    {\LARGE\bfseries Analyse des Plans de Comptage\\[0.3em]
+    PreContainer et PostContainer}\\[1em]
+    {\large Validation avec Géométrie Tout Air}\\[1.5em]
+    {\normalsize Simulation Geant4 -- Source ${}^{152}$Eu}\\[0.5em]
+    {\small \today}
+\end{center}
+
+\vspace{1em}
+
+% ───────────────────────────────────────────────────────────────
+% RÉSUMÉ
+% ───────────────────────────────────────────────────────────────
+\begin{abstract}
+Ce document présente l'analyse des résultats de simulation Monte Carlo obtenus avec Geant4 pour une géométrie de test où tous les matériaux ont été remplacés par de l'air. L'objectif est de valider le fonctionnement des plans de comptage PreContainer et PostContainer en vérifiant que les distributions de photons entrant et transmis sont quasi-identiques, et que la rétrodiffusion est nulle.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+% ═══════════════════════════════════════════════════════════════
+\section{Configuration de la Simulation}
+% ═══════════════════════════════════════════════════════════════
+
+\subsection{Paramètres généraux}
+
+\begin{itemize}
+    \item \textbf{Nombre d'événements} : $N = \num{25e6}$ désintégrations
+    \item \textbf{Source} : ${}^{152}$Eu (11 raies gamma principales)
+    \item \textbf{Géométrie} : Tous les matériaux remplacés par de l'air
+    \item \textbf{Plans de comptage} :
+    \begin{itemize}
+        \item PreContainerPlane : $z = \SI{97.5}{mm}$ (avant l'eau)
+        \item PostContainerPlane : $z = \SI{103.5}{mm}$ (après l'eau)
+    \end{itemize}
+\end{itemize}
+
+\subsection{Définition des observables}
+
+Les particules sont comptées selon leur direction de propagation :
+
+\begin{table}[H]
+\centering
+\caption{Définition des observables aux plans de comptage}
+\begin{tabular}{lll}
+\toprule
+\textbf{Plan} & \textbf{Direction} & \textbf{Signification physique} \\
+\midrule
+PreContainer & $p_z > 0$ (+z) & Particules \textbf{entrant} dans la région eau \\
+PostContainer & $p_z > 0$ (+z) & Particules \textbf{transmises} (sortant de l'eau) \\
+PostContainer & $p_z < 0$ (-z) & Particules \textbf{rétrodiffusées} (backscatter) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ═══════════════════════════════════════════════════════════════
+\section{Résultats pour les Photons}
+% ═══════════════════════════════════════════════════════════════
+
+\subsection{Statistiques globales}
+
+\begin{table}[H]
+\centering
+\caption{Comparaison des distributions de photons entre PreContainer et PostContainer}
+\label{tab:photons}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Observable} & \textbf{PreContainer} & \textbf{PostContainer} & \textbf{Écart relatif} \\
+ & (entrant) & (transmis) & \\
+\midrule
+Nombre moyen $\langle N_\gamma \rangle$ & \num{1.155} & \num{1.004} & $-13.1\%$ \\
+Écart-type $\sigma_{N_\gamma}$ & \num{0.991} & \num{0.934} & $-5.7\%$ \\
+Énergie moyenne $\langle \Sigma E_\gamma \rangle$ & \SI{1124}{keV} & \SI{1059}{keV} & $-5.8\%$ \\
+Écart-type $\sigma_{\Sigma E}$ & \SI{783}{keV} & \SI{745}{keV} & $-4.9\%$ \\
+Entrées (énergie $> 0$) & \num{17.86e6} & \num{16.49e6} & $-7.7\%$ \\
+\midrule
+\textbf{Backscatter} & --- & \textbf{0} & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Interprétation physique}
+
+\subsubsection{Transmission quasi-totale}
+
+Les distributions PreContainer et PostContainer sont très similaires, ce qui est attendu pour une géométrie tout air :
+
+\begin{equation}
+\frac{\langle N_\gamma \rangle_\text{Post}}{\langle N_\gamma \rangle_\text{Pre}} = \frac{1.004}{1.155} \approx 0.87
+\end{equation}
+
+La différence de $\sim 13\%$ s'explique par les effets géométriques :
+\begin{itemize}
+    \item Les photons émis avec un angle $\theta$ important par rapport à l'axe $z$ peuvent sortir latéralement du cylindre de détection (rayon $R = \SI{25}{mm}$)
+    \item La distance entre les deux plans est $\Delta z = \SI{6}{mm}$
+\end{itemize}
+
+\subsubsection{Absence de rétrodiffusion}
+
+Le résultat $N_{\gamma,\text{back}} = 0$ confirme que :
+\begin{itemize}
+    \item Le code de détection des directions fonctionne correctement
+    \item Dans l'air, la section efficace de diffusion Compton est négligeable
+    \item Il n'y a pas de matériau pour générer des photons rétrodiffusés
+\end{itemize}
+
+% ═══════════════════════════════════════════════════════════════
+\section{Résultats pour les Électrons}
+% ═══════════════════════════════════════════════════════════════
+
+\subsection{Statistiques globales}
+
+\begin{table}[H]
+\centering
+\caption{Statistiques des électrons aux plans de comptage}
+\label{tab:electrons}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Observable} & \textbf{PreContainer} & \textbf{PostContainer} & \textbf{PostContainer} \\
+ & (entrant) & (transmis) & (backscatter) \\
+\midrule
+Nombre moyen $\langle N_{e^-} \rangle$ & \num{3.9e-4} & \num{4.3e-4} & \textbf{0} \\
+Écart-type $\sigma_{N_{e^-}}$ & \num{0.020} & \num{0.022} & 0 \\
+Énergie moyenne $\langle \Sigma E_{e^-} \rangle$ & \SI{360}{keV} & \SI{286}{keV} & \SI{0}{keV} \\
+Entrées (énergie $> 0$) & $\sim 9750$ & $\sim 10046$ & 0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Interprétation}
+
+\begin{itemize}
+    \item \textbf{Faible production d'électrons} : $\langle N_{e^-} \rangle \sim \num{4e-4}$ par désintégration, soit environ 1 électron pour 2500 événements
+    \item \textbf{Légère augmentation au PostContainer} : Les électrons supplémentaires proviennent de :
+    \begin{itemize}
+        \item Diffusion Compton des photons dans l'air (très faible)
+        \item Éventuellement, production de paires pour les photons de haute énergie
+    \end{itemize}
+    \item \textbf{Backscatter nul} : Confirme l'absence de matériau diffuseur
+\end{itemize}
+
+% ═══════════════════════════════════════════════════════════════
+\section{Validation du Code}
+% ═══════════════════════════════════════════════════════════════
+
+\subsection{Tests de cohérence}
+
+\begin{enumerate}
+    \item \textbf{Conservation approximative} : Le rapport $N_\text{Post}/N_\text{Pre} \approx 0.87$ est cohérent avec les pertes géométriques latérales.
+    
+    \item \textbf{Backscatter nul} : $N_{\gamma,\text{back}} = N_{e^-,\text{back}} = 0$ confirme que :
+    \begin{itemize}
+        \item La détection de la direction ($p_z > 0$ vs $p_z < 0$) fonctionne
+        \item L'air ne produit pas de rétrodiffusion mesurable
+    \end{itemize}
+    
+    \item \textbf{Distributions d'énergie} : Les spectres PreContainer et PostContainer sont quasi-superposés, avec les raies caractéristiques de ${}^{152}$Eu visibles.
+\end{enumerate}
+
+\subsection{Estimation des pertes géométriques}
+
+Pour un cône d'émission de demi-angle $\theta_\text{max} = 20°$ et une distance $\Delta z = \SI{6}{mm}$, le rayon additionnel couvert est :
+
+\begin{equation}
+\Delta r = \Delta z \cdot \tan(\theta_\text{max}) = 6 \times \tan(20°) \approx \SI{2.2}{mm}
+\end{equation}
+
+Les photons à la limite du cylindre ($r \approx \SI{25}{mm}$) au PreContainer peuvent dépasser le rayon de détection au PostContainer, expliquant les pertes observées.
+
+% ═══════════════════════════════════════════════════════════════
+\section{Conclusion}
+% ═══════════════════════════════════════════════════════════════
+
+La simulation avec géométrie tout air valide le bon fonctionnement des plans de comptage :
+
+\begin{itemize}
+    \item[\checkmark] Les distributions de photons PreContainer et PostContainer sont quasi-identiques
+    \item[\checkmark] La rétrodiffusion est nulle (aucun matériau diffuseur)
+    \item[\checkmark] Les différences observées ($\sim 13\%$) s'expliquent par les effets géométriques
+    \item[\checkmark] Le code est prêt pour une simulation avec la géométrie réelle
+\end{itemize}
+
+\vspace{1em}
+
+\noindent\textbf{Prochaine étape} : Relancer la simulation avec les vrais matériaux (eau, PETG, tungstène) pour mesurer :
+\begin{itemize}
+    \item L'atténuation des photons par l'eau
+    \item La rétrodiffusion Compton
+    \item La production d'électrons secondaires
+\end{itemize}
+
+% ═══════════════════════════════════════════════════════════════
+\appendix
+\section{Description des Figures Générées}
+% ═══════════════════════════════════════════════════════════════
+
+Le script ROOT \texttt{plot\_container\_planes.C} génère 6 fichiers PNG correspondant à 6 canvas. Chaque figure est décrite ci-dessous avec son contenu et son interprétation.
+
+\subsection{Canvas 1 : PreContainerPlane (avant l'eau)}
+
+\noindent\textbf{Fichier :} \texttt{histos\_precontainer.png}
+
+\noindent\textbf{Contenu :} 4 histogrammes (2$\times$2) représentant les particules \textbf{entrant dans la région eau} (direction $+z$) :
+\begin{itemize}
+    \item Haut gauche : Nombre de photons par désintégration ($N_\gamma$)
+    \item Haut droite : Somme des énergies des photons ($\Sigma E_\gamma$ en keV)
+    \item Bas gauche : Nombre d'électrons par désintégration ($N_{e^-}$)
+    \item Bas droite : Somme des énergies des électrons ($\Sigma E_{e^-}$ en keV)
+\end{itemize}
+
+\noindent\textbf{Interprétation :} Ce plan mesure le flux de particules \textbf{incident} sur la région où se trouve normalement l'eau. C'est la référence pour calculer l'atténuation.
+
+\subsection{Canvas 2 : PostContainerPlane -- Photons transmis}
+
+\noindent\textbf{Fichier :} \texttt{histos\_postcontainer\_photons\_transmis.png}
+
+\noindent\textbf{Contenu :} 2 histogrammes représentant les photons \textbf{sortant de l'eau} (direction $+z$, transmis) :
+\begin{itemize}
+    \item Gauche : Nombre de photons transmis par désintégration ($N_\gamma$ transmis)
+    \item Droite : Somme des énergies des photons transmis ($\Sigma E_\gamma$ en keV)
+\end{itemize}
+
+\noindent\textbf{Interprétation :} Ces photons ont traversé la région eau sans être absorbés ni rétrodiffusés. La comparaison avec le PreContainer permet de mesurer l'atténuation.
+
+\subsection{Canvas 3 : PostContainerPlane -- Photons rétrodiffusés}
+
+\noindent\textbf{Fichier :} \texttt{histos\_postcontainer\_photons\_backscatter.png}
+
+\noindent\textbf{Contenu :} 2 histogrammes représentant les photons \textbf{retournant vers l'eau} (direction $-z$, backscatter) :
+\begin{itemize}
+    \item Gauche : Nombre de photons rétrodiffusés par désintégration ($N_\gamma$ backscatter)
+    \item Droite : Somme des énergies des photons rétrodiffusés ($\Sigma E_\gamma$ en keV)
+\end{itemize}
+
+\noindent\textbf{Interprétation :} Ces photons proviennent de la diffusion Compton dans les matériaux situés après l'eau. Dans la géométrie tout air, cette distribution est \textbf{vide} (Mean = 0).
+
+\subsection{Canvas 4 : Comparaison Entrant vs Transmis}
+
+\noindent\textbf{Fichier :} \texttt{histos\_comparison\_photons.png}
+
+\noindent\textbf{Contenu :} 2 histogrammes superposés (Pre en orange, Post en cyan) :
+\begin{itemize}
+    \item Gauche : Superposition des distributions $N_\gamma$ (entrant vs transmis)
+    \item Droite : Superposition des distributions $\Sigma E_\gamma$ (entrant vs transmis)
+\end{itemize}
+
+\noindent\textbf{Interprétation :} Cette figure permet de visualiser directement l'atténuation. Dans la géométrie tout air, les deux distributions sont quasi-superposées.
+
+\subsection{Canvas 5 : PostContainerPlane -- Électrons transmis}
+
+\noindent\textbf{Fichier :} \texttt{histos\_postcontainer\_electrons\_transmis.png}
+
+\noindent\textbf{Contenu :} 2 histogrammes représentant les électrons \textbf{sortant de l'eau} (direction $+z$) :
+\begin{itemize}
+    \item Gauche : Nombre d'électrons transmis par désintégration ($N_{e^-}$ transmis)
+    \item Droite : Somme des énergies des électrons transmis ($\Sigma E_{e^-}$ en keV)
+\end{itemize}
+
+\noindent\textbf{Interprétation :} Ces électrons peuvent être des électrons primaires ayant traversé l'eau, ou des électrons secondaires produits par effet Compton ou photoélectrique dans l'eau.
+
+\subsection{Canvas 6 : PostContainerPlane -- Électrons rétrodiffusés}
+
+\noindent\textbf{Fichier :} \texttt{histos\_postcontainer\_electrons\_backscatter.png}
+
+\noindent\textbf{Contenu :} 2 histogrammes représentant les électrons \textbf{retournant vers l'eau} (direction $-z$) :
+\begin{itemize}
+    \item Gauche : Nombre d'électrons rétrodiffusés par désintégration ($N_{e^-}$ backscatter)
+    \item Droite : Somme des énergies des électrons rétrodiffusés ($\Sigma E_{e^-}$ en keV)
+\end{itemize}
+
+\noindent\textbf{Interprétation :} Ces électrons proviennent de la rétrodiffusion dans les matériaux après l'eau. Dans la géométrie tout air, cette distribution est \textbf{vide}.
+
+\subsection{Récapitulatif}
+
+\begin{table}[H]
+\centering
+\caption{Récapitulatif des 6 figures générées}
+\begin{tabular}{clll}
+\toprule
+\textbf{Canvas} & \textbf{Fichier PNG} & \textbf{Plan} & \textbf{Particules / Direction} \\
+\midrule
+1 & \texttt{histos\_precontainer.png} & Pre & $\gamma$ et $e^-$ entrant ($+z$) \\
+2 & \texttt{histos\_postcontainer\_photons\_transmis.png} & Post & $\gamma$ transmis ($+z$) \\
+3 & \texttt{histos\_postcontainer\_photons\_backscatter.png} & Post & $\gamma$ backscatter ($-z$) \\
+4 & \texttt{histos\_comparison\_photons.png} & Pre+Post & $\gamma$ superposition \\
+5 & \texttt{histos\_postcontainer\_electrons\_transmis.png} & Post & $e^-$ transmis ($+z$) \\
+6 & \texttt{histos\_postcontainer\_electrons\_backscatter.png} & Post & $e^-$ backscatter ($-z$) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\end{document}

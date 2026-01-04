@@ -1,0 +1,221 @@
+╔═══════════════════════════════════════════════════════════════════╗
+║            PUITS COURONNE - DIAGNOSTIC LOG                        ║
+║            2026-01-04 12:11:11                               ║
+╚═══════════════════════════════════════════════════════════════════╝
+
+
+======================================================================
+  Démarrage du Run 0
+======================================================================
+=== MASSES DES ANNEAUX D'EAU ===
+  Anneau 0 : r=[0-5] mm | V=0.3927 cm³ | m=0.3927 g
+  Anneau 1 : r=[5-10] mm | V=1.1781 cm³ | m=1.1781 g
+  Anneau 2 : r=[10-15] mm | V=1.9635 cm³ | m=1.9635 g
+  Anneau 3 : r=[15-20] mm | V=2.7489 cm³ | m=2.7489 g
+  Anneau 4 : r=[20-25] mm | V=3.5343 cm³ | m=3.5343 g
+  TOTAL : 9.81748 g
+UPSTREAM | Event 0 | PRIMARY gamma trackID=1 | E=1085.87 keV | [1086 keV]
+PRE_FILTER_PLANE | Event 0 | trackID=1 | E=1085.87 keV | z=35.5 mm
+FILTER_ENTRY | Event 0 | trackID=1 | E=1085.87 keV | [1086 keV] | z=37.5 mm
+FILTER_EXIT | Event 0 | trackID=1 | E=1085.87 keV | [1086 keV] | z=42.5 mm
+POST_FILTER_PLANE | Event 0 | trackID=1 | E=1085.87 keV | z=43.5 mm
+DOWNSTREAM | Event 0 | PRIMARY gamma trackID=1 | E=1085.87 keV | [1086 keV]
+PRE_CONTAINER_PLANE | Event 0 | PHOTON +z | trackID=1 | E=1085.87 keV | z=97.5 mm
+WATER_ENTRY | Event 0 | gamma | trackID=1 | parentID=0 | E=1085.87 keV | [1086 keV] | r=15.3003 mm | z=98.5 mm | WaterRing_3Log
+POST_CONTAINER_PLANE | Event 0 | PHOTON +z (transmis) | trackID=1 | E=1085.87 keV | z=103.5 mm
+CONTAINER_ENTRY | Event 0 | trackID=1 | E=1085.87 keV | z=103.52 mm
+GAMMA_ABSORBED | Event 0 | trackID=1 | in World | E=1085.87 keV
+EVENT 0 SUMMARY: Primaries=1 Transmitted=1 Absorbed=0 TotalDeposit=0 keV
+  PreContainer: nPhotons=1 sumE=1085.87 keV | nElec=0 sumE=0 keV
+  PostContainer: nPhotons_back=0 sumE_back=0 keV | nPhotons_fwd=1 sumE_fwd=1085.87 keV | nElec_back=0 sumE_back=0 keV | nElec_fwd=0 sumE_fwd=0 keV
+UPSTREAM | Event 1 | PRIMARY gamma trackID=2 | E=244.7 keV | [245 keV]
+PRE_FILTER_PLANE | Event 1 | trackID=2 | E=244.7 keV | z=35.5 mm
+FILTER_ENTRY | Event 1 | trackID=2 | E=244.7 keV | [245 keV] | z=37.5 mm
+FILTER_EXIT | Event 1 | trackID=2 | E=244.7 keV | [245 keV] | z=42.5 mm
+POST_FILTER_PLANE | Event 1 | trackID=2 | E=244.7 keV | z=43.5 mm
+DOWNSTREAM | Event 1 | PRIMARY gamma trackID=2 | E=244.7 keV | [245 keV]
+PRE_CONTAINER_PLANE | Event 1 | PHOTON +z | trackID=2 | E=244.7 keV | z=97.5 mm
+WATER_ENTRY | Event 1 | gamma | trackID=2 | parentID=0 | E=244.7 keV | [245 keV] | r=12.0339 mm | z=98.5 mm | WaterRing_2Log
+POST_CONTAINER_PLANE | Event 1 | PHOTON +z (transmis) | trackID=2 | E=244.7 keV | z=103.5 mm
+CONTAINER_ENTRY | Event 1 | trackID=2 | E=244.7 keV | z=103.52 mm
+GAMMA_ABSORBED | Event 1 | trackID=2 | in ContainerTopLog | E=244.7 keV
+UPSTREAM | Event 1 | PRIMARY gamma trackID=1 | E=121.78 keV | [122 keV]
+PRE_FILTER_PLANE | Event 1 | trackID=1 | E=121.78 keV | z=35.5 mm
+FILTER_ENTRY | Event 1 | trackID=1 | E=121.78 keV | [122 keV] | z=37.5 mm
+FILTER_EXIT | Event 1 | trackID=1 | E=121.78 keV | [122 keV] | z=42.5 mm
+POST_FILTER_PLANE | Event 1 | trackID=1 | E=121.78 keV | z=43.5 mm
+DOWNSTREAM | Event 1 | PRIMARY gamma trackID=1 | E=121.78 keV | [122 keV]
+PRE_CONTAINER_PLANE | Event 1 | PHOTON +z | trackID=1 | E=121.78 keV | z=97.5 mm
+WATER_ENTRY | Event 1 | gamma | trackID=1 | parentID=0 | E=121.78 keV | [122 keV] | r=12.9241 mm | z=98.5 mm | WaterRing_2Log
+POST_CONTAINER_PLANE | Event 1 | PHOTON +z (transmis) | trackID=1 | E=121.78 keV | z=103.5 mm
+CONTAINER_ENTRY | Event 1 | trackID=1 | E=121.78 keV | z=103.52 mm
+GAMMA_ABSORBED | Event 1 | trackID=1 | in ContainerTopLog | E=121.78 keV
+POST_CONTAINER_PLANE | Event 1 | PHOTON -z (backscatter) | trackID=7 | E=59.483 keV | z=103.5 mm
+WATER_ENTRY | Event 1 | gamma | trackID=7 | parentID=1 | E=59.483 keV | r=13.8072 mm | z=102.5 mm | WaterRing_2Log
+EVENT 1 SUMMARY: Primaries=2 Transmitted=2 Absorbed=0 TotalDeposit=0 keV
+  PreContainer: nPhotons=2 sumE=366.48 keV | nElec=0 sumE=0 keV
+  PostContainer: nPhotons_back=1 sumE_back=59.483 keV | nPhotons_fwd=2 sumE_fwd=366.48 keV | nElec_back=0 sumE_back=0 keV | nElec_fwd=0 sumE_fwd=0 keV
+UPSTREAM | Event 2 | PRIMARY gamma trackID=1 | E=344.28 keV | [344 keV]
+PRE_FILTER_PLANE | Event 2 | trackID=1 | E=344.28 keV | z=35.5 mm
+FILTER_ENTRY | Event 2 | trackID=1 | E=344.28 keV | [344 keV] | z=37.5 mm
+FILTER_EXIT | Event 2 | trackID=1 | E=344.28 keV | [344 keV] | z=42.5 mm
+POST_FILTER_PLANE | Event 2 | trackID=1 | E=344.28 keV | z=43.5 mm
+DOWNSTREAM | Event 2 | PRIMARY gamma trackID=1 | E=344.28 keV | [344 keV]
+CONTAINER_ENTRY | Event 2 | trackID=1 | E=344.28 keV | z=96.5 mm
+GAMMA_ABSORBED | Event 2 | trackID=1 | in World | E=327.414 keV
+EVENT 2 SUMMARY: Primaries=1 Transmitted=1 Absorbed=0 TotalDeposit=0 keV
+  PreContainer: nPhotons=0 sumE=0 keV | nElec=0 sumE=0 keV
+  PostContainer: nPhotons_back=0 sumE_back=0 keV | nPhotons_fwd=0 sumE_fwd=0 keV | nElec_back=0 sumE_back=0 keV | nElec_fwd=0 sumE_fwd=0 keV
+UPSTREAM | Event 3 | PRIMARY gamma trackID=2 | E=411.12 keV | [411 keV]
+PRE_FILTER_PLANE | Event 3 | trackID=2 | E=411.12 keV | z=35.5 mm
+FILTER_ENTRY | Event 3 | trackID=2 | E=411.12 keV | [411 keV] | z=37.5 mm
+FILTER_EXIT | Event 3 | trackID=2 | E=411.12 keV | [411 keV] | z=42.5 mm
+POST_FILTER_PLANE | Event 3 | trackID=2 | E=411.12 keV | z=43.5 mm
+DOWNSTREAM | Event 3 | PRIMARY gamma trackID=2 | E=411.12 keV | [411 keV]
+CONTAINER_ENTRY | Event 3 | trackID=2 | E=411.12 keV | z=96.5 mm
+GAMMA_ABSORBED | Event 3 | trackID=2 | in World | E=411.12 keV
+UPSTREAM | Event 3 | PRIMARY gamma trackID=1 | E=344.28 keV | [344 keV]
+PRE_FILTER_PLANE | Event 3 | trackID=1 | E=344.28 keV | z=35.5 mm
+FILTER_ENTRY | Event 3 | trackID=1 | E=344.28 keV | [344 keV] | z=37.5 mm
+FILTER_EXIT | Event 3 | trackID=1 | E=344.28 keV | [344 keV] | z=42.5 mm
+POST_FILTER_PLANE | Event 3 | trackID=1 | E=344.28 keV | z=43.5 mm
+DOWNSTREAM | Event 3 | PRIMARY gamma trackID=1 | E=344.28 keV | [344 keV]
+PRE_CONTAINER_PLANE | Event 3 | PHOTON +z | trackID=1 | E=344.28 keV | z=97.5 mm
+WATER_ENTRY | Event 3 | gamma | trackID=1 | parentID=0 | E=344.28 keV | [344 keV] | r=18.997 mm | z=98.5 mm | WaterRing_3Log
+POST_CONTAINER_PLANE | Event 3 | PHOTON +z (transmis) | trackID=1 | E=344.28 keV | z=102.645 mm
+CONTAINER_ENTRY | Event 3 | trackID=1 | E=344.28 keV | z=103.52 mm
+GAMMA_ABSORBED | Event 3 | trackID=1 | in World | E=344.28 keV
+EVENT 3 SUMMARY: Primaries=2 Transmitted=2 Absorbed=0 TotalDeposit=0 keV
+  PreContainer: nPhotons=1 sumE=344.28 keV | nElec=0 sumE=0 keV
+  PostContainer: nPhotons_back=0 sumE_back=0 keV | nPhotons_fwd=1 sumE_fwd=344.28 keV | nElec_back=0 sumE_back=0 keV | nElec_fwd=0 sumE_fwd=0 keV
+UPSTREAM | Event 4 | PRIMARY gamma trackID=3 | E=1408.01 keV | [1408 keV]
+PRE_FILTER_PLANE | Event 4 | trackID=3 | E=1408.01 keV | z=35.5 mm
+FILTER_ENTRY | Event 4 | trackID=3 | E=1408.01 keV | [1408 keV] | z=37.5 mm
+FILTER_EXIT | Event 4 | trackID=3 | E=1408.01 keV | [1408 keV] | z=42.5 mm
+POST_FILTER_PLANE | Event 4 | trackID=3 | E=1408.01 keV | z=43.5 mm
+DOWNSTREAM | Event 4 | PRIMARY gamma trackID=3 | E=1408.01 keV | [1408 keV]
+PRE_CONTAINER_PLANE | Event 4 | PHOTON +z | trackID=3 | E=1408.01 keV | z=97.5 mm
+WATER_ENTRY | Event 4 | gamma | trackID=3 | parentID=0 | E=1408.01 keV | [1408 keV] | r=15.5328 mm | z=98.5 mm | WaterRing_3Log
+POST_CONTAINER_PLANE | Event 4 | PHOTON +z (transmis) | trackID=3 | E=1408.01 keV | z=103.5 mm
+CONTAINER_ENTRY | Event 4 | trackID=3 | E=1408.01 keV | z=103.52 mm
+GAMMA_ABSORBED | Event 4 | trackID=3 | in World | E=1408.01 keV
+UPSTREAM | Event 4 | PRIMARY gamma trackID=2 | E=1112.07 keV | [1112 keV]
+PRE_FILTER_PLANE | Event 4 | trackID=2 | E=1112.07 keV | z=35.5 mm
+FILTER_ENTRY | Event 4 | trackID=2 | E=1112.07 keV | [1112 keV] | z=37.5 mm
+FILTER_EXIT | Event 4 | trackID=2 | E=1112.07 keV | [1112 keV] | z=42.5 mm
+POST_FILTER_PLANE | Event 4 | trackID=2 | E=1112.07 keV | z=43.5 mm
+DOWNSTREAM | Event 4 | PRIMARY gamma trackID=2 | E=1112.07 keV | [1112 keV]
+PRE_CONTAINER_PLANE | Event 4 | PHOTON +z | trackID=2 | E=1112.07 keV | z=97.5 mm
+WATER_ENTRY | Event 4 | gamma | trackID=2 | parentID=0 | E=1112.07 keV | [1112 keV] | r=17.0513 mm | z=98.5 mm | WaterRing_3Log
+POST_CONTAINER_PLANE | Event 4 | PHOTON +z (transmis) | trackID=2 | E=1112.07 keV | z=103.5 mm
+CONTAINER_ENTRY | Event 4 | trackID=2 | E=1112.07 keV | z=103.52 mm
+GAMMA_ABSORBED | Event 4 | trackID=2 | in World | E=1112.07 keV
+UPSTREAM | Event 4 | PRIMARY gamma trackID=1 | E=964.08 keV | [964 keV]
+PRE_FILTER_PLANE | Event 4 | trackID=1 | E=964.08 keV | z=35.5 mm
+FILTER_ENTRY | Event 4 | trackID=1 | E=964.08 keV | [964 keV] | z=37.5 mm
+FILTER_EXIT | Event 4 | trackID=1 | E=964.08 keV | [964 keV] | z=42.5 mm
+POST_FILTER_PLANE | Event 4 | trackID=1 | E=964.08 keV | z=43.5 mm
+DOWNSTREAM | Event 4 | PRIMARY gamma trackID=1 | E=964.08 keV | [964 keV]
+PRE_CONTAINER_PLANE | Event 4 | PHOTON +z | trackID=1 | E=964.08 keV | z=97.5 mm
+WATER_ENTRY | Event 4 | gamma | trackID=1 | parentID=0 | E=964.08 keV | [964 keV] | r=3.80163 mm | z=98.5 mm | WaterRing_0Log
+POST_CONTAINER_PLANE | Event 4 | PHOTON +z (transmis) | trackID=1 | E=964.08 keV | z=103.5 mm
+CONTAINER_ENTRY | Event 4 | trackID=1 | E=964.08 keV | z=103.52 mm
+GAMMA_ABSORBED | Event 4 | trackID=1 | in World | E=964.08 keV
+EVENT 4 SUMMARY: Primaries=3 Transmitted=3 Absorbed=0 TotalDeposit=0 keV
+  PreContainer: nPhotons=3 sumE=3484.16 keV | nElec=0 sumE=0 keV
+  PostContainer: nPhotons_back=0 sumE_back=0 keV | nPhotons_fwd=3 sumE_fwd=3484.16 keV | nElec_back=0 sumE_back=0 keV | nElec_fwd=0 sumE_fwd=0 keV
+EVENT 5 SUMMARY: Primaries=0 Transmitted=0 Absorbed=0 TotalDeposit=0 keV
+  PreContainer: nPhotons=0 sumE=0 keV | nElec=0 sumE=0 keV
+  PostContainer: nPhotons_back=0 sumE_back=0 keV | nPhotons_fwd=0 sumE_fwd=0 keV | nElec_back=0 sumE_back=0 keV | nElec_fwd=0 sumE_fwd=0 keV
+UPSTREAM | Event 6 | PRIMARY gamma trackID=1 | E=121.78 keV | [122 keV]
+PRE_FILTER_PLANE | Event 6 | trackID=1 | E=121.78 keV | z=35.5 mm
+FILTER_ENTRY | Event 6 | trackID=1 | E=121.78 keV | [122 keV] | z=37.5 mm
+FILTER_EXIT | Event 6 | trackID=1 | E=121.78 keV | [122 keV] | z=42.5 mm
+POST_FILTER_PLANE | Event 6 | trackID=1 | E=121.78 keV | z=43.5 mm
+DOWNSTREAM | Event 6 | PRIMARY gamma trackID=1 | E=121.78 keV | [122 keV]
+PRE_CONTAINER_PLANE | Event 6 | PHOTON +z | trackID=1 | E=104.923 keV | z=97.5 mm
+WATER_ENTRY | Event 6 | gamma | trackID=1 | parentID=0 | E=104.923 keV | [122 keV] | r=12.3865 mm | z=98.5 mm | WaterRing_2Log
+POST_CONTAINER_PLANE | Event 6 | PHOTON +z (transmis) | trackID=1 | E=104.923 keV | z=103.5 mm
+CONTAINER_ENTRY | Event 6 | trackID=1 | E=104.923 keV | z=103.52 mm
+GAMMA_ABSORBED | Event 6 | trackID=1 | in ContainerTopLog | E=104.923 keV
+EVENT 6 SUMMARY: Primaries=1 Transmitted=1 Absorbed=0 TotalDeposit=0 keV
+  PreContainer: nPhotons=1 sumE=104.923 keV | nElec=0 sumE=0 keV
+  PostContainer: nPhotons_back=0 sumE_back=0 keV | nPhotons_fwd=1 sumE_fwd=104.923 keV | nElec_back=0 sumE_back=0 keV | nElec_fwd=0 sumE_fwd=0 keV
+UPSTREAM | Event 7 | PRIMARY gamma trackID=2 | E=344.28 keV | [344 keV]
+PRE_FILTER_PLANE | Event 7 | trackID=2 | E=344.28 keV | z=35.5 mm
+FILTER_ENTRY | Event 7 | trackID=2 | E=344.28 keV | [344 keV] | z=37.5 mm
+FILTER_EXIT | Event 7 | trackID=2 | E=344.28 keV | [344 keV] | z=42.5 mm
+POST_FILTER_PLANE | Event 7 | trackID=2 | E=344.28 keV | z=43.5 mm
+DOWNSTREAM | Event 7 | PRIMARY gamma trackID=2 | E=344.28 keV | [344 keV]
+CONTAINER_ENTRY | Event 7 | trackID=2 | E=344.28 keV | z=97.2967 mm
+GAMMA_ABSORBED | Event 7 | trackID=2 | in World | E=344.28 keV
+UPSTREAM | Event 7 | PRIMARY gamma trackID=1 | E=121.78 keV | [122 keV]
+PRE_FILTER_PLANE | Event 7 | trackID=1 | E=121.78 keV | z=35.5 mm
+FILTER_ENTRY | Event 7 | trackID=1 | E=121.78 keV | [122 keV] | z=37.5 mm
+FILTER_EXIT | Event 7 | trackID=1 | E=121.78 keV | [122 keV] | z=42.5 mm
+POST_FILTER_PLANE | Event 7 | trackID=1 | E=121.78 keV | z=43.5 mm
+DOWNSTREAM | Event 7 | PRIMARY gamma trackID=1 | E=121.78 keV | [122 keV]
+CONTAINER_ENTRY | Event 7 | trackID=1 | E=121.78 keV | z=96.5 mm
+GAMMA_ABSORBED | Event 7 | trackID=1 | in ContainerWallLog | E=121.78 keV
+EVENT 7 SUMMARY: Primaries=2 Transmitted=2 Absorbed=0 TotalDeposit=0 keV
+  PreContainer: nPhotons=0 sumE=0 keV | nElec=0 sumE=0 keV
+  PostContainer: nPhotons_back=0 sumE_back=0 keV | nPhotons_fwd=0 sumE_fwd=0 keV | nElec_back=0 sumE_back=0 keV | nElec_fwd=0 sumE_fwd=0 keV
+UPSTREAM | Event 8 | PRIMARY gamma trackID=4 | E=1408.01 keV | [1408 keV]
+PRE_FILTER_PLANE | Event 8 | trackID=4 | E=1408.01 keV | z=35.5 mm
+FILTER_ENTRY | Event 8 | trackID=4 | E=1408.01 keV | [1408 keV] | z=37.5 mm
+FILTER_EXIT | Event 8 | trackID=4 | E=1408.01 keV | [1408 keV] | z=42.5 mm
+POST_FILTER_PLANE | Event 8 | trackID=4 | E=1408.01 keV | z=43.5 mm
+DOWNSTREAM | Event 8 | PRIMARY gamma trackID=4 | E=1408.01 keV | [1408 keV]
+PRE_CONTAINER_PLANE | Event 8 | PHOTON +z | trackID=4 | E=1408.01 keV | z=97.5 mm
+WATER_ENTRY | Event 8 | gamma | trackID=4 | parentID=0 | E=1408.01 keV | [1408 keV] | r=18.1269 mm | z=98.5 mm | WaterRing_3Log
+POST_CONTAINER_PLANE | Event 8 | PHOTON +z (transmis) | trackID=4 | E=1408.01 keV | z=103.5 mm
+CONTAINER_ENTRY | Event 8 | trackID=4 | E=1408.01 keV | z=103.52 mm
+GAMMA_ABSORBED | Event 8 | trackID=4 | in World | E=1408.01 keV
+UPSTREAM | Event 8 | PRIMARY gamma trackID=3 | E=1112.07 keV | [1112 keV]
+PRE_FILTER_PLANE | Event 8 | trackID=3 | E=1112.07 keV | z=35.5 mm
+FILTER_ENTRY | Event 8 | trackID=3 | E=1112.07 keV | [1112 keV] | z=37.5 mm
+FILTER_EXIT | Event 8 | trackID=3 | E=1112.07 keV | [1112 keV] | z=42.5 mm
+POST_FILTER_PLANE | Event 8 | trackID=3 | E=1112.07 keV | z=43.5 mm
+DOWNSTREAM | Event 8 | PRIMARY gamma trackID=3 | E=1112.07 keV | [1112 keV]
+PRE_CONTAINER_PLANE | Event 8 | PHOTON +z | trackID=3 | E=1112.07 keV | z=97.5 mm
+WATER_ENTRY | Event 8 | gamma | trackID=3 | parentID=0 | E=1112.07 keV | [1112 keV] | r=15.8059 mm | z=98.5 mm | WaterRing_3Log
+POST_CONTAINER_PLANE | Event 8 | PHOTON +z (transmis) | trackID=3 | E=1112.07 keV | z=103.5 mm
+CONTAINER_ENTRY | Event 8 | trackID=3 | E=1112.07 keV | z=103.52 mm
+GAMMA_ABSORBED | Event 8 | trackID=3 | in World | E=1112.07 keV
+UPSTREAM | Event 8 | PRIMARY gamma trackID=2 | E=443.97 keV | [444 keV]
+PRE_FILTER_PLANE | Event 8 | trackID=2 | E=443.97 keV | z=35.5 mm
+FILTER_ENTRY | Event 8 | trackID=2 | E=443.97 keV | [444 keV] | z=37.5 mm
+FILTER_EXIT | Event 8 | trackID=2 | E=443.97 keV | [444 keV] | z=42.5 mm
+POST_FILTER_PLANE | Event 8 | trackID=2 | E=443.97 keV | z=43.5 mm
+DOWNSTREAM | Event 8 | PRIMARY gamma trackID=2 | E=443.97 keV | [444 keV]
+PRE_CONTAINER_PLANE | Event 8 | PHOTON +z | trackID=2 | E=443.97 keV | z=97.5 mm
+WATER_ENTRY | Event 8 | gamma | trackID=2 | parentID=0 | E=443.97 keV | [444 keV] | r=8.71595 mm | z=98.5 mm | WaterRing_1Log
+POST_CONTAINER_PLANE | Event 8 | PHOTON +z (transmis) | trackID=2 | E=443.97 keV | z=103.5 mm
+CONTAINER_ENTRY | Event 8 | trackID=2 | E=443.97 keV | z=103.52 mm
+GAMMA_ABSORBED | Event 8 | trackID=2 | in World | E=443.97 keV
+UPSTREAM | Event 8 | PRIMARY gamma trackID=1 | E=121.78 keV | [122 keV]
+PRE_FILTER_PLANE | Event 8 | trackID=1 | E=121.78 keV | z=35.5 mm
+FILTER_ENTRY | Event 8 | trackID=1 | E=121.78 keV | [122 keV] | z=37.5 mm
+FILTER_EXIT | Event 8 | trackID=1 | E=121.78 keV | [122 keV] | z=42.5 mm
+POST_FILTER_PLANE | Event 8 | trackID=1 | E=121.78 keV | z=43.5 mm
+DOWNSTREAM | Event 8 | PRIMARY gamma trackID=1 | E=121.78 keV | [122 keV]
+PRE_CONTAINER_PLANE | Event 8 | PHOTON +z | trackID=1 | E=121.78 keV | z=97.5 mm
+CONTAINER_ENTRY | Event 8 | trackID=1 | E=121.78 keV | z=97.8838 mm
+GAMMA_ABSORBED | Event 8 | trackID=1 | in ContainerWallLog | E=121.78 keV
+EVENT 8 SUMMARY: Primaries=4 Transmitted=4 Absorbed=0 TotalDeposit=0 keV
+  PreContainer: nPhotons=4 sumE=3085.83 keV | nElec=0 sumE=0 keV
+  PostContainer: nPhotons_back=0 sumE_back=0 keV | nPhotons_fwd=3 sumE_fwd=2964.05 keV | nElec_back=0 sumE_back=0 keV | nElec_fwd=0 sumE_fwd=0 keV
+UPSTREAM | Event 9 | PRIMARY gamma trackID=1 | E=964.08 keV | [964 keV]
+PRE_FILTER_PLANE | Event 9 | trackID=1 | E=964.08 keV | z=35.5 mm
+FILTER_ENTRY | Event 9 | trackID=1 | E=964.08 keV | [964 keV] | z=37.5 mm
+FILTER_EXIT | Event 9 | trackID=1 | E=964.08 keV | [964 keV] | z=42.5 mm
+POST_FILTER_PLANE | Event 9 | trackID=1 | E=964.08 keV | z=43.5 mm
+DOWNSTREAM | Event 9 | PRIMARY gamma trackID=1 | E=964.08 keV | [964 keV]
+PRE_CONTAINER_PLANE | Event 9 | PHOTON +z | trackID=1 | E=964.08 keV | z=97.5 mm
+WATER_ENTRY | Event 9 | gamma | trackID=1 | parentID=0 | E=964.08 keV | [964 keV] | r=10.8169 mm | z=98.5 mm | WaterRing_2Log
+POST_CONTAINER_PLANE | Event 9 | PHOTON +z (transmis) | trackID=1 | E=964.08 keV | z=103.5 mm
+CONTAINER_ENTRY | Event 9 | trackID=1 | E=964.08 keV | z=103.52 mm
+GAMMA_ABSORBED | Event 9 | trackID=1 | in World | E=964.08 keV
+EVENT 9 SUMMARY: Primaries=1 Transmitted=1 Absorbed=0 TotalDeposit=0 keV
+  PreContainer: nPhotons=1 sumE=964.08 keV | nElec=0 sumE=0 keV
+  PostContainer: nPhotons_back=0 sumE_back=0 keV | nPhotons_fwd=1 sumE_fwd=964.08 keV | nElec_back=0 sumE_back=0 keV | nElec_fwd=0 sumE_fwd=0 keV

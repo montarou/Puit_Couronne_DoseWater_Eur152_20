@@ -1,0 +1,156 @@
+╔═══════════════════════════════════════════════════════════════════╗
+║            PUITS COURONNE - DIAGNOSTIC LOG                        ║
+║            2026-01-04 19:28:02                               ║
+╚═══════════════════════════════════════════════════════════════════╝
+
+
+======================================================================
+  Démarrage du Run 0
+======================================================================
+=== MASSES DES ANNEAUX D'EAU ===
+  Anneau 0 : r=[0-5] mm | V=0.3927 cm³ | m=0.3927 g
+  Anneau 1 : r=[5-10] mm | V=1.1781 cm³ | m=1.1781 g
+  Anneau 2 : r=[10-15] mm | V=1.9635 cm³ | m=1.9635 g
+  Anneau 3 : r=[15-20] mm | V=2.7489 cm³ | m=2.7489 g
+  Anneau 4 : r=[20-25] mm | V=3.5343 cm³ | m=3.5343 g
+  TOTAL : 9.81748 g
+UPSTREAM | Event 0 | PRIMARY gamma trackID=1 | E=1408.01 keV | [1408 keV]
+PRE_FILTER_PLANE | Event 0 | trackID=1 | E=1408.01 keV | z=35.5 mm
+FILTER_ENTRY | Event 0 | trackID=1 | E=1408.01 keV | [1408 keV] | z=37.5 mm
+FILTER_EXIT | Event 0 | trackID=1 | E=1408.01 keV | [1408 keV] | z=42.5 mm
+POST_FILTER_PLANE | Event 0 | trackID=1 | E=1408.01 keV | z=43.5 mm
+DOWNSTREAM | Event 0 | PRIMARY gamma trackID=1 | E=1408.01 keV | [1408 keV]
+PRE_CONTAINER_PLANE | Event 0 | PHOTON +z | trackID=1 | E=1408.01 keV | z=98.5 mm
+WATER_ENTRY | Event 0 | gamma | trackID=1 | parentID=0 | E=1408.01 keV | [1408 keV] | r=22.1252 mm | z=99.5 mm | WaterRing_4Log
+POST_CONTAINER_PLANE | Event 0 | PHOTON +z (transmis) | trackID=1 | E=1408.01 keV | z=103.5 mm
+CONTAINER_ENTRY | Event 0 | trackID=1 | E=1408.01 keV | z=103.52 mm
+GAMMA_ABSORBED | Event 0 | trackID=1 | in World | E=1408.01 keV
+EVENT 0 SUMMARY: Primaries=1 Transmitted=1 Absorbed=0 TotalDeposit=0 keV
+  PreContainer: nPhotons=1 sumE=1408.01 keV | nElec=0 sumE=0 keV
+  PostContainer: nPhotons_back=0 sumE_back=0 keV | nPhotons_fwd=1 sumE_fwd=1408.01 keV | nElec_back=0 sumE_back=0 keV | nElec_fwd=0 sumE_fwd=0 keV
+EVENT 1 SUMMARY: Primaries=0 Transmitted=0 Absorbed=0 TotalDeposit=0 keV
+  PreContainer: nPhotons=0 sumE=0 keV | nElec=0 sumE=0 keV
+  PostContainer: nPhotons_back=0 sumE_back=0 keV | nPhotons_fwd=0 sumE_fwd=0 keV | nElec_back=0 sumE_back=0 keV | nElec_fwd=0 sumE_fwd=0 keV
+EVENT 2 SUMMARY: Primaries=0 Transmitted=0 Absorbed=0 TotalDeposit=0 keV
+  PreContainer: nPhotons=0 sumE=0 keV | nElec=0 sumE=0 keV
+  PostContainer: nPhotons_back=0 sumE_back=0 keV | nPhotons_fwd=0 sumE_fwd=0 keV | nElec_back=0 sumE_back=0 keV | nElec_fwd=0 sumE_fwd=0 keV
+UPSTREAM | Event 3 | PRIMARY gamma trackID=2 | E=1112.07 keV | [1112 keV]
+PRE_FILTER_PLANE | Event 3 | trackID=2 | E=1112.07 keV | z=35.5 mm
+FILTER_ENTRY | Event 3 | trackID=2 | E=1112.07 keV | [1112 keV] | z=37.5 mm
+FILTER_EXIT | Event 3 | trackID=2 | E=1112.07 keV | [1112 keV] | z=42.5 mm
+POST_FILTER_PLANE | Event 3 | trackID=2 | E=1112.07 keV | z=43.5 mm
+DOWNSTREAM | Event 3 | PRIMARY gamma trackID=2 | E=1112.07 keV | [1112 keV]
+PRE_CONTAINER_PLANE | Event 3 | PHOTON +z | trackID=2 | E=1112.07 keV | z=98.5 mm
+WATER_ENTRY | Event 3 | gamma | trackID=2 | parentID=0 | E=1112.07 keV | [1112 keV] | r=9.54241 mm | z=99.5 mm | WaterRing_1Log
+POST_CONTAINER_PLANE | Event 3 | PHOTON +z (transmis) | trackID=2 | E=1112.07 keV | z=103.312 mm
+CONTAINER_ENTRY | Event 3 | trackID=2 | E=1112.07 keV | z=103.52 mm
+GAMMA_ABSORBED | Event 3 | trackID=2 | in World | E=1112.07 keV
+UPSTREAM | Event 3 | PRIMARY gamma trackID=1 | E=867.38 keV | [867 keV]
+PRE_FILTER_PLANE | Event 3 | trackID=1 | E=867.38 keV | z=35.5 mm
+FILTER_ENTRY | Event 3 | trackID=1 | E=867.38 keV | [867 keV] | z=37.5 mm
+FILTER_EXIT | Event 3 | trackID=1 | E=867.38 keV | [867 keV] | z=42.5 mm
+POST_FILTER_PLANE | Event 3 | trackID=1 | E=867.38 keV | z=43.5 mm
+DOWNSTREAM | Event 3 | PRIMARY gamma trackID=1 | E=867.38 keV | [867 keV]
+PRE_CONTAINER_PLANE | Event 3 | PHOTON +z | trackID=1 | E=867.38 keV | z=98.5 mm
+WATER_ENTRY | Event 3 | gamma | trackID=1 | parentID=0 | E=867.38 keV | [867 keV] | r=14.2876 mm | z=99.5 mm | WaterRing_2Log
+POST_CONTAINER_PLANE | Event 3 | PHOTON +z (transmis) | trackID=1 | E=867.38 keV | z=103.464 mm
+CONTAINER_ENTRY | Event 3 | trackID=1 | E=867.38 keV | z=103.52 mm
+GAMMA_ABSORBED | Event 3 | trackID=1 | in World | E=867.38 keV
+EVENT 3 SUMMARY: Primaries=2 Transmitted=2 Absorbed=0 TotalDeposit=0 keV
+  PreContainer: nPhotons=2 sumE=1979.45 keV | nElec=0 sumE=0 keV
+  PostContainer: nPhotons_back=0 sumE_back=0 keV | nPhotons_fwd=2 sumE_fwd=1979.45 keV | nElec_back=0 sumE_back=0 keV | nElec_fwd=0 sumE_fwd=0 keV
+UPSTREAM | Event 4 | PRIMARY gamma trackID=2 | E=1408.01 keV | [1408 keV]
+PRE_FILTER_PLANE | Event 4 | trackID=2 | E=1408.01 keV | z=35.5 mm
+FILTER_ENTRY | Event 4 | trackID=2 | E=1408.01 keV | [1408 keV] | z=37.5 mm
+FILTER_EXIT | Event 4 | trackID=2 | E=316.175 keV | [1408 keV] | z=37.5 mm
+GAMMA_ABSORBED | Event 4 | trackID=2 | in World | E=316.175 keV
+UPSTREAM | Event 4 | PRIMARY gamma trackID=1 | E=344.28 keV | [344 keV]
+PRE_FILTER_PLANE | Event 4 | trackID=1 | E=344.28 keV | z=35.5 mm
+FILTER_ENTRY | Event 4 | trackID=1 | E=344.28 keV | [344 keV] | z=37.5 mm
+FILTER_EXIT | Event 4 | trackID=1 | E=344.28 keV | [344 keV] | z=42.5 mm
+POST_FILTER_PLANE | Event 4 | trackID=1 | E=344.28 keV | z=43.5 mm
+DOWNSTREAM | Event 4 | PRIMARY gamma trackID=1 | E=344.28 keV | [344 keV]
+PRE_CONTAINER_PLANE | Event 4 | PHOTON +z | trackID=1 | E=344.28 keV | z=98.5 mm
+WATER_ENTRY | Event 4 | gamma | trackID=1 | parentID=0 | E=344.28 keV | [344 keV] | r=19.1342 mm | z=99.5 mm | WaterRing_3Log
+POST_CONTAINER_PLANE | Event 4 | PHOTON +z (transmis) | trackID=1 | E=344.28 keV | z=103.097 mm
+CONTAINER_ENTRY | Event 4 | trackID=1 | E=344.28 keV | z=103.52 mm
+GAMMA_ABSORBED | Event 4 | trackID=1 | in World | E=344.28 keV
+EVENT 4 SUMMARY: Primaries=2 Transmitted=1 Absorbed=1 TotalDeposit=0 keV
+  PreContainer: nPhotons=1 sumE=344.28 keV | nElec=0 sumE=0 keV
+  PostContainer: nPhotons_back=0 sumE_back=0 keV | nPhotons_fwd=1 sumE_fwd=344.28 keV | nElec_back=0 sumE_back=0 keV | nElec_fwd=0 sumE_fwd=0 keV
+EVENT 5 SUMMARY: Primaries=0 Transmitted=0 Absorbed=0 TotalDeposit=0 keV
+  PreContainer: nPhotons=0 sumE=0 keV | nElec=0 sumE=0 keV
+  PostContainer: nPhotons_back=0 sumE_back=0 keV | nPhotons_fwd=0 sumE_fwd=0 keV | nElec_back=0 sumE_back=0 keV | nElec_fwd=0 sumE_fwd=0 keV
+EVENT 6 SUMMARY: Primaries=0 Transmitted=0 Absorbed=0 TotalDeposit=0 keV
+  PreContainer: nPhotons=0 sumE=0 keV | nElec=0 sumE=0 keV
+  PostContainer: nPhotons_back=0 sumE_back=0 keV | nPhotons_fwd=0 sumE_fwd=0 keV | nElec_back=0 sumE_back=0 keV | nElec_fwd=0 sumE_fwd=0 keV
+UPSTREAM | Event 7 | PRIMARY gamma trackID=1 | E=344.28 keV | [344 keV]
+PRE_FILTER_PLANE | Event 7 | trackID=1 | E=344.28 keV | z=35.5 mm
+FILTER_ENTRY | Event 7 | trackID=1 | E=344.28 keV | [344 keV] | z=37.5 mm
+GAMMA_ABSORBED | Event 7 | trackID=1 | in FilterLog | E=197.41 keV
+EVENT 7 SUMMARY: Primaries=1 Transmitted=0 Absorbed=1 TotalDeposit=0 keV
+  PreContainer: nPhotons=0 sumE=0 keV | nElec=0 sumE=0 keV
+  PostContainer: nPhotons_back=0 sumE_back=0 keV | nPhotons_fwd=0 sumE_fwd=0 keV | nElec_back=0 sumE_back=0 keV | nElec_fwd=0 sumE_fwd=0 keV
+EVENT 8 SUMMARY: Primaries=0 Transmitted=0 Absorbed=0 TotalDeposit=0 keV
+  PreContainer: nPhotons=0 sumE=0 keV | nElec=0 sumE=0 keV
+  PostContainer: nPhotons_back=0 sumE_back=0 keV | nPhotons_fwd=0 sumE_fwd=0 keV | nElec_back=0 sumE_back=0 keV | nElec_fwd=0 sumE_fwd=0 keV
+EVENT 9 SUMMARY: Primaries=0 Transmitted=0 Absorbed=0 TotalDeposit=0 keV
+  PreContainer: nPhotons=0 sumE=0 keV | nElec=0 sumE=0 keV
+  PostContainer: nPhotons_back=0 sumE_back=0 keV | nPhotons_fwd=0 sumE_fwd=0 keV | nElec_back=0 sumE_back=0 keV | nElec_fwd=0 sumE_fwd=0 keV
+
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                           RÉSULTATS DU RUN                                    ║
+╠═══════════════════════════════════════════════════════════════════════════════╣
+║  Événements simulés:   25000000                                          ║
+║  Primaires générés:    36078810                                          ║
+║  Transmis:             22914672                                          ║
+║  Absorbés:             11371270                                          ║
+╠═══════════════════════════════════════════════════════════════════════════════╣
+║  COMPTEURS DE PASSAGE (plans cylindriques) :                                  ║
+║    Pre-filtre:         36076302                                          ║
+║    Post-filtre:        24917862                                          ║
+║    Pre-container:      18129706  (avant eau, air)                       ║
+║    Post-container:     15889384  (après eau, W_PETG)                    ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+╔═══════════════════════════════════════════════════════════════════════════════════════════════╗
+║                                  DOSES PAR ANNEAU (nGy)                                       ║
+╠══════════╦═══════════════╦═══════════════╦═══════════════╦═══════════════╦════════════════════╣
+║  Anneau  ║   Masse (g)   ║ E_dep (MeV)   ║  Dose (nGy)   ║ Dose/evt(nGy) ║  Événements        ║
+╠══════════╬═══════════════╬═══════════════╬═══════════════╬═══════════════╬════════════════════╣
+║     0    ║       0.3927  ║    7.849e+03  ║    3.202e+03  ║    1.019e-01  ║             31415  ║
+║     1    ║       1.1781  ║    2.345e+04  ║    3.189e+03  ║    3.433e-02  ║             92884  ║
+║     2    ║       1.9635  ║    3.854e+04  ║    3.145e+03  ║    2.078e-02  ║            151335  ║
+║     3    ║       2.7489  ║    5.244e+04  ║    3.057e+03  ║    1.501e-02  ║            203605  ║
+║     4    ║       3.5343  ║    6.836e+04  ║    3.099e+03  ║    1.221e-02  ║            253838  ║
+╠══════════╬═══════════════╬═══════════════╬═══════════════╬═══════════════╬════════════════════╣
+║  TOTAL   ║       9.8175  ║    1.906e+05  ║    1.569e+04  ║    6.277e-04  ║          25000000  ║
+╚══════════╩═══════════════╩═══════════════╩═══════════════╩═══════════════╩════════════════════╝
+
+╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+║                                    TAUX D'ABSORPTION PAR RAIE GAMMA Eu-152                                         ║
+╠═══════════════╦═══════════╦═══════════════╦═══════════════╦═══════════════╦═══════════════╦═══════════════════════════╣
+║     Raie      ║   Émis    ║ Sortis filtre ║  Abs. filtre  ║ Entrés eau    ║   Abs. eau    ║  Taux abs. filtre/eau (%) ║
+╠═══════════════╬═══════════╬═══════════════╬═══════════════╬═══════════════╬═══════════════╬═══════════════════════════╣
+║ 122 keV       ║   7103444 ║        138500 ║       6965852 ║         68292 ║            65 ║      98.06 /       0.10 ║
+║ 245 keV       ║   1880801 ║        915905 ║        970805 ║        613434 ║            67 ║      51.62 /       0.01 ║
+║ 344 keV       ║   6648612 ║       4793927 ║       1879023 ║       3246284 ║           159 ║      28.26 /       0.00 ║
+║ 411 keV       ║    559282 ║        447334 ║        113858 ║        304543 ║             8 ║      20.36 /       0.00 ║
+║ 444 keV       ║    707768 ║        584829 ║        125390 ║        399369 ║            10 ║      17.72 /       0.00 ║
+║ 779 keV       ║   3245534 ║       3033919 ║        218645 ║       2118537 ║            22 ║       6.74 /       0.00 ║
+║ 867 keV       ║   1059220 ║       1001088 ║         60159 ║        701777 ║             8 ║       5.68 /       0.00 ║
+║ 964 keV       ║   3656733 ║       3484949 ║        178390 ║       2458691 ║            20 ║       4.88 /       0.00 ║
+║ 1086 keV      ║   2554740 ║       2454031 ║        104939 ║       1738807 ║             7 ║       4.11 /       0.00 ║
+║ 1112 keV      ║   3410302 ║       3280037 ║        135712 ║       2327896 ║            13 ║       3.98 /       0.00 ║
+║ 1408 keV      ║   5252374 ║       5099907 ║        159141 ║       3659438 ║            77 ║       3.03 /       0.00 ║
+╠═══════════════╬═══════════╬═══════════════╬═══════════════╬═══════════════╬═══════════════╬═══════════════════════════╣
+║     TOTAL     ║  36078810 ║      25234426 ║      10911914 ║      17637068 ║           456 ║      30.24 /       0.00 ║
+╚═══════════════╩═══════════════╩═══════════════╩═══════════════╩═══════════════╩═══════════════╩═══════════════════════════╝
+
+======================================================================
+  Fin du Run - Résultats
+======================================================================
+
+╔═══════════════════════════════════════════════════════════════════╗
+║            END OF LOG - 2026-01-04 19:48:46                    ║
+╚═══════════════════════════════════════════════════════════════════╝
